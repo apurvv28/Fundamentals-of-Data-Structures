@@ -18,13 +18,12 @@ void reset_counters(){
 }
 
 long long gauss(long long a, long long b){
-	//recursive_calls++;
+	recursive_calls++;
 	if(a<10 || b<10){
-		//multiplications++;
+		multiplications++;
 		return a * b;
 	}
-	//Size of numbers
-	//digit_count += 2;
+	digit_count += 2;
 	int n = max(to_string(a).length(), to_string(b).length());
 	//Divide size of number in 2 parts for divide and conquer approach
 	int m = n/2;
@@ -40,7 +39,7 @@ long long gauss(long long a, long long b){
     long long z2 = gauss(a_high, b_low);
     long long z3 = gauss(a_high, b_high);
     
-    //additions += 2;
+    additions += 2;
     return z3 * pow(10, 2 * m) + (z1 + z2) * pow(10, m) + z0;
 }
 
