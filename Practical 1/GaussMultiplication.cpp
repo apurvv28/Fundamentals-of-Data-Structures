@@ -40,8 +40,8 @@ long long gauss(long long a, long long b){
     long long z3 = gauss(a_high, b_high);
     
     additions += 2;
-    return z3 * pow(10, 2 * m) + (z1 + z2) * pow(10, m) + z0;
-}
+    return z3 * pow(10, 2 * m) + (z1 + z2) * pow(10, m) + z0;   
+}  
 
 int main(){
 	long long n1, n2;
