@@ -1,69 +1,75 @@
 #include <iostream>
 #include <cmath>
 #include <string>
-#include <chrono>
+#include <ctime>
 using namespace std;
-using namespace std::chrono;
 
-int recursive_calls = 0;
-int multiplications = 0;
-int additions = 0;
-int digit_count = 0;
+int recursive_calls=0;
+int multiplications=0;
+int additions=0;
+int digit_count=0;
 
-void reset_counters(){
-    recursive_calls = 0;
-    multiplications = 0;
-    additions = 0;
-    digit_count = 0;
+void reset_counters() {
+    recursive_calls=0;
+    multiplications=0;
+    additions=0;
+    digit_count=0;
 }
 
-long long gauss(long long a, long long b){
-	recursive_calls++;
-	if(a<10 || b<10){
-		multiplications++;
-		return a * b;
+long long pow10(int m) {
+    long long p =1;
+    for (int i=0; i < m; i++){
+		p *= 10;
 	}
-	digit_count += 2;
-	int n = max(to_string(a).length(), to_string(b).length());
-	//Divide size of number in 2 parts for divide and conquer approach
-	int m = n/2;
-	//Split number into high and low parts
-	long long power = pow(10,m);
-	long long a_high = a/power;
-	long long b_high = b/power;
-	long long a_low = a%power;
-	long long b_low = b%power;
-	//Recursively calculate 4 products needed 
-	long long z0 = gauss(a_low, b_low);
-    long long z1 = gauss(a_low, b_high);
-    long long z2 = gauss(a_high, b_low);
-    long long z3 = gauss(a_high, b_high);
-    
-    additions += 2;
-    return z3 * pow(10, 2 * m) + (z1 + z2) * pow(10, m) + z0;   
-}  
+    return p;
+}
 
-int main(){
-	long long n1, n2;
-	cout<<"Enter first number : ";
-	cin>>n1; 
-	cout<<endl;
-	cout<<"Enter second number : ";
-	cin>>n2; 
-	cout<<endl;
-	reset_counters();
-	
-	auto start = high_resolution_clock::now();
+long long gauss(long long x, long long y) {
+    recursive_calls++;
+    if (x<10 || y<10) {
+        multiplications++;
+        return x*y;
+    }
+
+    int n = max(to_string(x).length(), to_string(y).length());
+    int m = n/2;
+    digit_count += n;
+
+    long long power = pow10(m);
+    long long a = x / power;
+    long long c = y / power;
+    long long b = x % power;
+    long long d = y % power;
+
+    long long bd = gauss(b, d);
+    long long bc = gauss(b, c);
+    long long ad = gauss(a, d);
+    long long ac = gauss(a, c);
+
+    additions += 2;
+    return ac * pow10(2 * m) + (bc + ad) * pow10(m) + bd;
+}
+
+int main() {
+    long long n1, n2;
+    cout << "Enter first number : ";
+    cin >> n1;
+    cout << "Enter second number : ";
+    cin >> n2;
+
+    reset_counters();
+
+    clock_t start = clock();
     long long result = gauss(n1, n2);
-    auto stop = high_resolution_clock::now();
-    auto duration = duration_cast<microseconds>(stop - start);
-    
-	cout << "Gauss Multiplication : "<<n1<< " x "<<n2<<" = "<<result<<endl;
-	cout << "Recursive calls: " << recursive_calls << endl;
-    cout << "Multiplications: " << multiplications << endl;
-    cout << "Additions: " << additions << endl;
-    cout << "Digit count: " << digit_count << endl;
-    cout << "Execution time: " << duration.count() << " ms" << endl;
-    
-	return 0;
+    clock_t stop = clock();
+    double duration = double(stop - start) / CLOCKS_PER_SEC * 1000.0;
+
+    cout << "Gauss Multiplication : "<< result <<endl;
+    cout << "Recursive calls: " << recursive_calls <<endl;
+    cout << "Multiplications: " << multiplications <<endl;
+    cout << "Additions: " << additions <<endl;
+    cout << "Digit count: " << digit_count <<endl;
+    cout << "Execution time: " << duration << " ms" <<endl;
+
+    return 0;
 }

@@ -2,22 +2,28 @@
 //Time Complexity: Worst Case = O(n log n) due to sorting, Best Case = Omega(n), Average Case = Theta(n log n)
 //Space Complexity: O(1)
 
-
 #include <iostream>
 #include <vector>
 #include <algorithm>
 using namespace std;
 
-int coinChange(vector<int> coins, int amount) {
+void coinChange(vector<int> coins, int amount) {
     sort(coins.begin(), coins.end(), greater<int>());
-    int count = 0;
+    vector<int> count(coins.size(), 0);
+
     for (int i = 0; i < coins.size(); i++) {
-        if (amount >= coins[i]) {
-            count += amount/coins[i];
-            amount = amount%coins[i];
+        while (amount >= coins[i]) {
+            amount -= coins[i];
+            count[i]++;
         }
     }
-    return count;
+
+    cout << "Coins used:\n";
+    for (int i = 0; i < coins.size(); i++) {
+        if (count[i] > 0) {
+            cout << coins[i] << " x " << count[i] << endl;
+        }
+    }
 }
 
 int main() {
@@ -39,7 +45,6 @@ int main() {
         cout << "Invalid amount!" << endl;
         return 0;
     }
-    result = coinChange(coins, amount);
-    cout << "Minimum number of coins required to make change for " << amount << " is: " << result << endl;
+    coinChange(coins, amount);
     return 0;
 }

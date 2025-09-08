@@ -12,8 +12,6 @@ This repository contains C++ implementations of two classic greedy algorithm pro
 ### Problem Statement
 Given a set of coin denominations and an amount, find the minimum number of coins required to make the amount using the greedy approach.
 
-> ⚠️ Note: The greedy method works only for certain coin systems (like standard Indian/US currency), not for arbitrary denominations.
-
 ---
 
 ### Algorithm Logic

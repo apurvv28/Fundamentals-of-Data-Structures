@@ -24,13 +24,13 @@ Given two integers `n1` and `n2`, multiply them efficiently using recursive divi
 ### Algorithm
 - Split both numbers into **high** and **low** parts.
 - Recursively compute:
-z0 = a_low × b_low
-z1 = a_low × b_high
-z2 = a_high × b_low
-z3 = a_high × b_high
+bd = b*d
+bc = b*c
+ad = a*d
+ac = a*c
 
 - Recombine using:
-result = z3 * 10^(2m) + (z1 + z2) * 10^m + z0
+result = ac * 10^(2m) + (bc + ad) * 10^m + bd
 
 ### Characteristics
 - Requires **4 recursive calls**.
@@ -44,12 +44,12 @@ result = z3 * 10^(2m) + (z1 + z2) * 10^m + z0
 ### Algorithm
 - Split both numbers into **high** and **low** parts.
 - Recursively compute:
-z0 = a_low × b_low
-z1 = (a_low + a_high) × (b_low + b_high)
-z2 = a_high × b_high
+bd = b*d
+abcd = (a + c) × (b + d)
+ac = a*c
 
 - Recombine using:
-result = z2 * 10^(2m) + (z1 - z2 - z0) * 10^m + z0
+result = ac * 10^(2m) + (abcd - ac - bd) * 10^m + bd
 
 
 ### Characteristics
