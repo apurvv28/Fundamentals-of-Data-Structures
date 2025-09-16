@@ -26,12 +26,14 @@ Given a set of coin denominations and an amount, find the minimum number of coin
 
 function coinChange(coins[], amount):
     sort coins in descending order
-    count = 0
-    for coin in coins:
-        if amount >= coin:
-            count += amount / coin
-            amount = amount % coin
-    return count
+    count[] = array of zeros, same size as coins
+    for i = 0 to coins.length - 1:
+        while amount >= coins[i]:
+            amount = amount - coins[i]
+            count[i] = count[i] + 1
+    for i = 0 to coins.length - 1:
+        if count[i] > 0:
+            print coins[i], "x", count[i]
 
 ### Time and Space Complexity
 > Sorting: O(n log n) (where n = number of coin denominations)
@@ -86,7 +88,8 @@ function activitySelection(activities[]):
 > Enter number of coin denominations: 4
 > Enter coin denominations: 1 2 5 10
 > Enter amount to make change: 27
-> Minimum number of coins required to make change for 27 is: 5
+> Coins Used : 10 x 2, 5 x 1, 2 x 1
+
 
 2. Activity Selection
 > Enter number of activities: 6
