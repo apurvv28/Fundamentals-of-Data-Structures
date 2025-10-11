@@ -10,7 +10,6 @@ void countsort(vector<int>& arr){
     for(int i = 0; i<n ; i++){
     	count[arr[i]]++;
 	}
-	//Cummulative Sequence
 	for(int i=1;i<=max;i++){
 		count[i] += count[i-1];
 	}

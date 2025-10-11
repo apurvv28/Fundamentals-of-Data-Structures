@@ -1,5 +1,6 @@
 #include<iostream>
 #include<algorithm>
+#include<cmath>
 using namespace std;
 
 int comparisons = 0;
@@ -128,6 +129,15 @@ while(true){
         cout<<"Element found at index: "<<result<<endl;
         c = comparisons;
         cout<<"Number of comparisons: "<<c<<endl;
+        if(c==1){
+            cout<<"Best Case - O(1)"<<endl;
+        }
+        else if(c==n){
+            cout<<"Worst Case - O(n)"<<endl;
+        }
+        else{
+            cout<<"Average Case - O(n)"<<endl;
+        }
         break;
 
         case 2:
@@ -135,6 +145,15 @@ while(true){
         cout<<"Element found at index: "<<result<<endl;
         c = comparisons;
         cout<<"Number of comparisons: "<<c<<endl;
+        if(c==1){
+            cout<<"Best Case - O(1)"<<endl;
+        }
+        else if(c==n){
+            cout<<"Worst Case - O(n)"<<endl;
+        }
+        else{
+            cout<<"Average Case - O(n)"<<endl;
+        }
         break;
 
         case 5:
@@ -155,14 +174,31 @@ while(true){
         cout<<"Element found at index: "<<result<<endl;
         c = comparisons;
         cout<<"Number of comparisons: "<<c<<endl;
+        if(c==1){
+            cout<<"Best Case - O(1)"<<endl;
+        }
+        else if(c==log(n)){
+            cout<<"Worst Case - O(log n)"<<endl;
+        }
+        else{
+            cout<<"Average Case - O(log n)"<<endl;
+        }
         break;
-
 
         case 4:
         result = fibonacci(arr,n,target);
         cout<<"Element found at index: "<<result<<endl;
         c = comparisons;
         cout<<"Number of comparisons = "<<c<<endl;
+        if(c==1){
+            cout<<"Best Case - O(1)"<<endl;
+        }
+        else if(c==log(n)){
+            cout<<"Worst Case - O(log n)"<<endl;
+        }
+        else{
+            cout<<"Average Case - O(log n)"<<endl;
+        }
         break;
 
         case 5:
