@@ -1,0 +1,618 @@
+{% extends "base.html" %}
+
+{% block title %}Registrations - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-4 mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-5" data-aos="fade-up" data-aos-duration="600">
+        <div>
+            <h1 class="display-5 fw-bold mb-2 retro-heading">
+                <i class="bi bi-list-check me-2"></i>Event <span class="retro-accent">Registrations</span>
+            </h1>
+            <p class="lead retro-text">
+                {% if session.role in ['Host', 'Organizer', 'Admin'] %}
+                    Manage and track all event registrations
+                {% else %}
+                    View your event registrations and tickets
+                {% endif %}
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            {% if session.role in ['Host', 'Organizer', 'Admin'] %}
+            <button class="btn btn-dark retro-btn" id="exportBtn">
+                <i class="bi bi-download me-2"></i>Export CSV
+            </button>
+            <a href="{{ url_for('checkin') }}" class="btn btn-dark retro-btn">
+                <i class="bi bi-qr-code-scan me-2"></i>Check-in
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Filters and Stats -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card retro-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="100">
+                <div class="card-body p-4">
+                    <h6 class="card-title mb-3 fw-bold retro-heading">Filter <span class="retro-accent">Registrations</span></h6>
+                    <div class="filter-buttons">
+                        <button class="btn btn-outline-dark retro-btn-outline active" data-filter="all">
+                            All <span class="badge retro-badge ms-1">{{ registrations|length }}</span>
+                        </button>
+                        <button class="btn btn-outline-dark retro-btn-outline" data-filter="checked-in">
+                            Checked In <span class="badge retro-badge-success ms-1">
+                                {{ registrations|selectattr('is_checked_in')|list|length }}
+                            </span>
+                        </button>
+                        <button class="btn btn-outline-dark retro-btn-outline" data-filter="pending">
+                            Pending <span class="badge retro-badge-warning ms-1">
+                                {{ registrations|rejectattr('is_checked_in')|list|length }}
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card retro-card text-center" data-aos="fade-up" data-aos-duration="600" data-aos-delay="200">
+                <div class="card-body p-4">
+                    <h3 class="fw-bold mb-2 retro-number">{{ registrations|length }}</h3>
+                    <p class="retro-text mb-0">Total Registrations</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registrations List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card retro-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="300">
+                <div class="card-header border-bottom py-3">
+                    <h5 class="card-title mb-0 fw-bold retro-heading">
+                        <i class="bi bi-card-checklist me-2"></i>
+                        {% if session.role in ['Host', 'Organizer', 'Admin'] %}
+                            All <span class="retro-accent">Registrations</span>
+                        {% else %}
+                            My <span class="retro-accent">Registrations</span>
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    {% if registrations %}
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="registrationsTable">
+                            <thead>
+                                <tr>
+                                    <th class="fw-medium">Participant</th>
+                                    <th class="fw-medium">Event</th>
+                                    <th class="fw-medium">Contact Info</th>
+                                    <th class="fw-medium">Registration Date</th>
+                                    <th class="fw-medium">Participants</th>
+                                    <th class="fw-medium">Status</th>
+                                    <th class="fw-medium">QR Code</th>
+                                    {% if session.role in ['Host', 'Organizer', 'Admin'] %}
+                                    <th class="fw-medium">Actions</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reg in registrations %}
+                                <tr class="registration-row {% if reg.is_checked_in %}table-success{% endif %}" 
+                                    data-status="{% if reg.is_checked_in %}checked-in{% else %}pending{% endif %}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0">
+                                                <div class="avatar-sm bg-dark text-white">
+                                                    {{ reg.full_name.split(' ')|map('first')|join('')|upper }}
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1 ms-3">
+                                                <h6 class="mb-0 fw-bold">{{ reg.full_name }}</h6>
+                                                <small class="text-muted">PRN: {{ reg.prn }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <strong>{{ reg.event_name }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ reg.class_name }} - {{ reg.branch }}</small>
+                                    </td>
+                                    <td>
+                                        <small class="d-block">{{ reg.email }}</small>
+                                        <small class="text-muted">{{ reg.phone }}</small>
+                                    </td>
+                                    <td>
+                                        <small class="d-block fw-bold">
+                                            {{ reg.created_at.strftime('%b %d, %Y') }}
+                                        </small>
+                                        <small class="text-muted">
+                                            {{ reg.created_at.strftime('%I:%M %p') }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <span class="badge retro-badge">{{ reg.num_participants }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge retro-badge-{% if reg.is_checked_in %}success{% else %}warning{% endif %}">
+                                            {% if reg.is_checked_in %}
+                                                <i class="bi bi-check-circle me-1"></i>Checked In
+                                            {% else %}
+                                                <i class="bi bi-clock me-1"></i>Pending
+                                            {% endif %}
+                                        </span>
+                                        {% if reg.is_checked_in and reg.checked_in_at %}
+                                        <br>
+                                        <small class="text-muted">
+                                            {{ reg.checked_in_at.strftime('%b %d, %I:%M %p') }}
+                                        </small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if reg.qr_code %}
+                                        <img src="data:image/png;base64,{{ reg.qr_code }}" 
+                                             alt="QR Code" 
+                                             class="qr-code-preview"
+                                             data-bs-toggle="modal" 
+                                             data-bs-target="#qrModal"
+                                             data-registration-name="{{ reg.full_name }}"
+                                             data-event-name="{{ reg.event_name }}"
+                                             data-qr-code="{{ reg.qr_code }}">
+                                        {% else %}
+                                        <span class="text-muted">No QR</span>
+                                        {% endif %}
+                                    </td>
+                                    {% if session.role in ['Host', 'Organizer', 'Admin'] %}
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-dark retro-btn-outline" 
+                                                    data-bs-toggle="tooltip" 
+                                                    title="View Details"
+                                                    onclick="viewRegistrationDetails('{{ reg._id }}')">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            {% if not reg.is_checked_in %}
+                                            <button class="btn btn-outline-dark retro-btn-outline" 
+                                                    data-bs-toggle="tooltip" 
+                                                    title="Check-in"
+                                                    onclick="checkInParticipant('{{ reg._id }}', '{{ reg.full_name }}')">
+                                                <i class="bi bi-check-lg"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    {% endif %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5" data-aos="fade-up">
+                        <i class="bi bi-person-x display-1 text-muted"></i>
+                        <h4 class="text-muted mt-3 retro-heading">No Registrations Found</h4>
+                        <p class="retro-text">
+                            {% if session.role in ['Host', 'Organizer', 'Admin'] %}
+                                There are no registrations for your events yet.
+                            {% else %}
+                                You haven't registered for any events yet.
+                            {% endif %}
+                        </p>
+                        {% if session.role not in ['Host', 'Organizer', 'Admin'] %}
+                        <a href="{{ url_for('events') }}" class="btn btn-dark retro-btn">
+                            <i class="bi bi-calendar-event me-2"></i>Browse Events
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Single QR Code Modal -->
+<div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content retro-card">
+            <div class="modal-header border-bottom">
+                <h6 class="modal-title fw-bold" id="qrModalLabel">QR Code</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <img id="qrModalImage" src="" alt="QR Code" class="qr-modal-img mb-3">
+                <h6 id="qrParticipantName" class="fw-bold"></h6>
+                <p id="qrEventName" class="small text-muted mb-2"></p>
+                <p class="small text-muted mb-3">Show this QR code at event check-in</p>
+                <button class="btn btn-sm btn-outline-dark retro-btn-outline" id="downloadQRBtn">
+                    <i class="bi bi-download me-1"></i>Download
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Registration Details Modal -->
+<div class="modal fade" id="registrationDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content retro-card">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold retro-heading">Registration <span class="retro-accent">Details</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="registrationDetailsContent">
+                <!-- Details will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Check-in Confirmation Modal -->
+<div class="modal fade" id="checkinModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content retro-card">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold">Confirm Check-in</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="checkinMessage">Are you sure you want to check in this participant?</p>
+            </div>
+            <div class="modal-footer border-top">
+                <button type="button" class="btn btn-outline-dark retro-btn-outline" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-dark retro-btn" id="confirmCheckinBtn">Confirm Check-in</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Global variables
+let isQRModalProcessing = false;
+let currentRegistrationId = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize AOS animations
+    AOS.init({
+        duration: 800,
+        once: true,
+        offset: 100
+    });
+
+    // Initialize Bootstrap modals
+    const qrModal = new bootstrap.Modal(document.getElementById('qrModal'));
+    const detailsModal = new bootstrap.Modal(document.getElementById('registrationDetailsModal'));
+    const checkinModal = new bootstrap.Modal(document.getElementById('checkinModal'));
+    
+    const qrModalImage = document.getElementById('qrModalImage');
+    const qrModalLabel = document.getElementById('qrModalLabel');
+    const qrParticipantName = document.getElementById('qrParticipantName');
+    const qrEventName = document.getElementById('qrEventName');
+    const downloadQRBtn = document.getElementById('downloadQRBtn');
+    const checkinMessage = document.getElementById('checkinMessage');
+    const confirmCheckinBtn = document.getElementById('confirmCheckinBtn');
+
+    // Add hover effects to cards
+    const cards = document.querySelectorAll('.retro-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.transition = 'transform 0.3s ease';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+
+    // QR Code click handler using event delegation
+    document.addEventListener('click', function(e) {
+        const qrElement = e.target.closest('.qr-code-preview');
+        
+        if (qrElement && !isQRModalProcessing) {
+            isQRModalProcessing = true;
+            
+            const participantName = qrElement.dataset.registrationName;
+            const eventName = qrElement.dataset.eventName;
+            const qrCodeData = qrElement.dataset.qrCode;
+
+            console.log('QR Code clicked for:', participantName);
+
+            // Update modal content
+            qrModalLabel.textContent = `QR Code - ${participantName}`;
+            qrParticipantName.textContent = participantName;
+            qrEventName.textContent = eventName;
+            qrModalImage.src = `data:image/png;base64,${qrCodeData}`;
+
+            // Update download button
+            downloadQRBtn.onclick = function() {
+                downloadQRCode(qrCodeData, `${participantName}_${eventName}_QRCode.png`);
+            };
+
+            // Show modal after a small delay
+            setTimeout(() => {
+                qrModal.show();
+                isQRModalProcessing = false;
+            }, 50);
+        }
+    });
+
+    // Modal event listeners to prevent multiple triggers
+    document.getElementById('qrModal').addEventListener('show.bs.modal', function() {
+        isQRModalProcessing = true;
+    });
+
+    document.getElementById('qrModal').addEventListener('hide.bs.modal', function() {
+        isQRModalProcessing = false;
+    });
+
+    // Filter functionality
+    const filterButtons = document.querySelectorAll('.filter-buttons .btn');
+    const registrationRows = document.querySelectorAll('.registration-row');
+
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const filter = this.dataset.filter;
+            
+            // Update active button
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Filter rows
+            registrationRows.forEach(row => {
+                if (filter === 'all' || row.dataset.status === filter) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    // Export functionality
+    document.getElementById('exportBtn')?.addEventListener('click', function() {
+        const table = document.getElementById('registrationsTable');
+        let csv = [];
+        const rows = table.querySelectorAll('tr');
+        
+        for (let i = 0; i < rows.length; i++) {
+            let row = [], cols = rows[i].querySelectorAll('td, th');
+            
+            for (let j = 0; j < cols.length - 1; j++) { // Exclude actions column
+                let data = cols[j].innerText.replace(/(\r\n|\n|\r)/gm, '').replace(/(\s\s)/gm, ' ');
+                data = data.replace(/"/g, '""');
+                row.push('"' + data + '"');
+            }
+            csv.push(row.join(','));
+        }
+
+        const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
+        const downloadLink = document.createElement('a');
+        downloadLink.download = `registrations-${new Date().toISOString().split('T')[0]}.csv`;
+        downloadLink.href = window.URL.createObjectURL(csvFile);
+        downloadLink.style.display = 'none';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        
+        EventHub.showNotification('Registrations exported successfully!', 'success');
+    });
+
+    // Check-in confirmation
+    confirmCheckinBtn.addEventListener('click', function() {
+        if (currentRegistrationId) {
+            performCheckIn(currentRegistrationId);
+        }
+    });
+});
+
+function viewRegistrationDetails(registrationId) {
+    // In a real application, you would fetch this data from the server
+    const detailsContent = `
+        <div class="registration-details">
+            <h6 class="fw-bold mb-3">Registration Information</h6>
+            <p>Detailed registration information would be displayed here.</p>
+            <p>This would include complete participant details, payment information, and registration history.</p>
+        </div>
+    `;
+    
+    document.getElementById('registrationDetailsContent').innerHTML = detailsContent;
+    const modal = new bootstrap.Modal(document.getElementById('registrationDetailsModal'));
+    modal.show();
+}
+
+function checkInParticipant(registrationId, participantName) {
+    currentRegistrationId = registrationId;
+    checkinMessage.textContent = `Are you sure you want to check in ${participName}?`;
+    
+    const modal = new bootstrap.Modal(document.getElementById('checkinModal'));
+    modal.show();
+}
+
+function performCheckIn(registrationId) {
+    // Show loading state
+    const confirmBtn = document.getElementById('confirmCheckinBtn');
+    const originalText = confirmBtn.innerHTML;
+    confirmBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Checking In...';
+    confirmBtn.disabled = true;
+
+    // Make API call to check in participant
+    fetch(`/api/registrations/${registrationId}/checkin`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            EventHub.showNotification('Participant checked in successfully!', 'success');
+            // Close the modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('checkinModal'));
+            modal.hide();
+            // Reload the page to reflect changes
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            throw new Error(data.error || 'Check-in failed');
+        }
+    })
+    .catch(error => {
+        console.error('Check-in error:', error);
+        EventHub.showNotification('Failed to check in participant. Please try again.', 'error');
+        // Reset button state
+        confirmBtn.innerHTML = originalText;
+        confirmBtn.disabled = false;
+    });
+}
+
+function downloadQRCode(qrCodeData, filename) {
+    try {
+        // Convert base64 to blob
+        const byteCharacters = atob(qrCodeData);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'image/png' });
+        
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        EventHub.showNotification('QR code downloaded successfully!', 'success');
+    } catch (error) {
+        console.error('QR code download failed:', error);
+        EventHub.showNotification('Failed to download QR code.', 'error');
+    }
+}
+
+// Initialize tooltips
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl)
+});
+</script>
+
+<style>
+.registration-card {
+    border: none;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    border-left: 4px solid var(--pure-black);
+}
+
+.registration-card.checked-in {
+    border-left-color: var(--success-color);
+}
+
+.registration-card.pending {
+    border-left-color: var(--warning-color);
+}
+
+.status-badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+}
+
+.qr-code-preview {
+    max-width: 80px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    border: 2px solid var(--light-grey);
+}
+
+.qr-code-preview:hover {
+    transform: scale(1.05);
+    border-color: var(--pure-black);
+}
+
+.filter-buttons .btn {
+    border-radius: 20px;
+    margin: 0 0.25rem 0.5rem 0;
+}
+
+.export-btn {
+    border-radius: 8px;
+}
+
+.registration-details {
+    background: var(--light-grey);
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.qr-modal-img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--light-grey);
+    border-radius: 8px;
+}
+
+.table th {
+    border-bottom: 2px solid var(--pure-black);
+    background: var(--light-grey);
+}
+
+.table td {
+    border-bottom: 1px solid var(--light-grey);
+    vertical-align: middle;
+}
+
+.avatar-sm {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.875rem;
+}
+
+.badge.retro-badge-success {
+    background: var(--success-color);
+    color: white;
+}
+
+.badge.retro-badge-warning {
+    background: var(--warning-color);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .display-5 {
+        font-size: 2rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .qr-code-preview {
+        max-width: 60px;
+    }
+}
+</style>
+{% endblock %}

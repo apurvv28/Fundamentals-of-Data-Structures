@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Register - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-4 mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card retro-card mt-5" data-aos="fade-up" data-aos-duration="600">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold mb-3 retro-heading">Create <span class="retro-accent">Account</span></h2>
+                        <p class="retro-text">Join EventHub today</p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('register') }}">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="full_name" class="form-label fw-medium">Full Name</label>
+                                <input type="text" class="form-control retro-input" id="full_name" name="full_name" required placeholder="Enter your full name">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label fw-medium">Email Address</label>
+                                <input type="email" class="form-control retro-input" id="email" name="email" required placeholder="Enter your email">
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-6">
+                                <label for="username" class="form-label fw-medium">Username</label>
+                                <input type="text" class="form-control retro-input" id="username" name="username" required placeholder="Choose a username">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="password" class="form-label fw-medium">Password</label>
+                                <input type="password" class="form-control retro-input" id="password" name="password" required placeholder="Create a password">
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <label for="role" class="form-label fw-medium">I am a</label>
+                            <select class="form-select retro-input" id="role" name="role" required>
+                                <option value="">Select Role</option>
+                                <option value="Participant">Participant</option>
+                                <option value="Host">Event Host</option>
+                                <option value="Organizer">Organizer</option>
+                            </select>
+                        </div>
+
+                        <div class="mt-3" id="organization-field" style="display: none;">
+                            <label for="organization" class="form-label fw-medium">Organization Name</label>
+                            <input type="text" class="form-control retro-input" id="organization" name="organization" placeholder="Enter organization name">
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-dark retro-btn">Create Account</button>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <p class="retro-text">Already have an account? 
+                                <a href="{{ url_for('login') }}" class="text-decoration-none fw-medium">Sign in here</a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleSelect = document.getElementById('role');
+    const orgField = document.getElementById('organization-field');
+
+    roleSelect.addEventListener('change', function() {
+        if (this.value === 'Host' || this.value === 'Organizer') {
+            orgField.style.display = 'block';
+            document.getElementById('organization').required = true;
+        } else {
+            orgField.style.display = 'none';
+            document.getElementById('organization').required = false;
+        }
+    });
+
+    // Initialize AOS animations
+    AOS.init({
+        duration: 800,
+        once: true,
+        offset: 100
+    });
+});
+</script>
+
+<style>
+.form-control.retro-input,
+.form-select.retro-input {
+    border: 2px solid var(--pure-black);
+    border-radius: 8px;
+    padding: 0.75rem;
+    background: var(--pure-white);
+    transition: all 0.3s ease;
+}
+
+.form-control.retro-input:focus,
+.form-select.retro-input:focus {
+    border-color: var(--pure-black);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+    outline: none;
+}
+
+.row.g-3 {
+    margin-bottom: -0.75rem;
+}
+
+.row.g-3 > [class*="col-"] {
+    padding-bottom: 0.75rem;
+}
+</style>
+{% endblock %}

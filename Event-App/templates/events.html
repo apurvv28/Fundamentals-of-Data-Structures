@@ -1,0 +1,900 @@
+{% extends "base.html" %}
+
+{% block title %}Events - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5 mt-4">
+    <!-- Header Section -->
+    <div class="row mb-5" data-aos="fade-up" data-aos-duration="600">
+        <div class="col-12 text-center">
+            <h1 class="display-5 fw-bold mb-1 retro-heading mt-3">Discover <span class="retro-accent">Amazing Events</span></h1>
+            <p class="lead retro-text">Find and register for events that match your interests</p>
+        </div>
+    </div>
+
+    <!-- Search and Filter Section -->
+    <div class="row mb-5" data-aos="fade-up" data-aos-duration="600" data-aos-delay="100">
+        <div class="col-12">
+            <div class="row align-items-center">
+                <div class="col-lg-8 mb-3 mb-lg-0">
+                    <div class="search-box position-relative">
+                        <input type="text" class="form-control retro-input ps-5" id="eventSearch" 
+                               placeholder="Search events by name, description, or venue...">
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <select class="form-select retro-input" id="eventSort">
+                        <option value="date">Sort by Date</option>
+                        <option value="name">Sort by Name</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events Grid -->
+    <div class="row" id="eventsContainer">
+        {% for event in events %}
+        <div class="col-xl-4 col-lg-6 mb-4 event-item" 
+             data-name="{{ event.title.lower() }}"
+             data-description="{{ event.description.lower() }}"
+             data-venue="{{ event.venue.lower() }}"
+             data-type="{{ 'team' if event.is_team_event else 'individual' }}"
+             data-date="{{ event.date }}"
+             data-price="{{ event.fee }}"
+             data-aos="fade-up" 
+             data-aos-duration="600" 
+             data-aos-delay="{{ loop.index * 100 }}">
+            <div class="card event-card h-100 retro-card">
+                <div class="position-relative overflow-hidden">
+                    <img src="{{ event.image_url or '/static/images/event-default.jpg' }}" 
+                         class="card-img-top event-card-img retro-image" 
+                         alt="{{ event.title }}"
+                         onerror="this.src='/static/images/event-default.jpg'">
+                    <div class="position-absolute top-0 end-0 m-3">
+                        <span class="badge retro-badge">
+                            {{ 'Team Event' if event.is_team_event else 'Individual' }}
+                        </span>
+                    </div>
+                    <div class="position-absolute top-0 start-0 m-3">
+                        <span class="badge retro-badge-dark">₹{{ event.fee }}</span>
+                    </div>
+                </div>
+                
+                <div class="card-body d-flex flex-column p-4">
+                    <div class="mb-3">
+                        <span class="badge retro-badge-light mb-2">{{ event.organization }}</span>
+                        <h5 class="card-title fw-bold mb-2">{{ event.title }}</h5>
+                        <p class="card-text text-muted">{{ event.description[:120] }}{% if event.description|length > 120 %}...{% endif %}</p>
+                    </div>
+                    
+                    <!-- Event Meta -->
+                    <div class="event-meta mb-4">
+                        <div class="d-flex align-items-center text-muted mb-2">
+                            <i class="bi bi-calendar-event me-2"></i>
+                            <small class="fw-medium">{{ event.date }} at {{ event.time }}</small>
+                        </div>
+                        <div class="d-flex align-items-center text-muted mb-2">
+                            <i class="bi bi-geo-alt me-2"></i>
+                            <small class="fw-medium">{{ event.venue }}</small>
+                        </div>
+                        {% if event.prize_pool and event.prize_pool != '0' %}
+                        <div class="d-flex align-items-center text-muted">
+                            <i class="bi bi-trophy me-2"></i>
+                            <small class="fw-medium">Prize: {{ event.prize_pool }}</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Capacity Bar -->
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <small class="text-muted fw-medium">Capacity</small>
+                                <div class="progress mt-1 retro-progress" style="height: 6px; width: 100px;">
+                                    <div class="progress-bar retro-progress-bar" 
+                                         style="width: {{ (event.registered_participants|length / event.capacity) * 100 }}%">
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="text-muted small fw-medium">
+                                {{ event.registered_participants|length }}/{{ event.capacity }}
+                            </span>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2">
+                            {% if session.username %}
+                                {% if session.role in ['Host', 'Organizer', 'Admin'] and event.host == session.username %}
+                                    <button class="btn btn-outline-dark retro-btn-outline" disabled>
+                                        <i class="bi bi-person-check me-2"></i>Your Event
+                                    </button>
+                                {% else %}
+                                    <button type="button" class="btn btn-dark w-100 retro-btn register-btn" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#registrationModal"
+                                            data-event-id="{{ event._id }}"
+                                            data-event-title="{{ event.title }}"
+                                            data-is-team="{{ 'true' if event.is_team_event else 'false' }}"
+                                            data-team-size="{{ event.team_size }}"
+                                            data-event-fee="{{ event.fee }}"
+                                            data-event-date="{{ event.date }}"
+                                            data-event-time="{{ event.time }}"
+                                            data-event-venue="{{ event.venue }}"
+                                            data-require-team-leader="{{ event.require_team_leader if event.require_team_leader else 'false' }}"
+                                            data-collect-participant-info="{{ event.collect_participant_info if event.collect_participant_info else 'false' }}"
+                                            data-payment-mode="{{ event.payment_mode if event.payment_mode else 'individual' }}">
+                                        <i class="bi bi-ticket-perforated me-2"></i>Register Now
+                                    </button>
+                                {% endif %}
+                            {% else %}
+                                <a href="{{ url_for('login') }}" class="btn btn-dark w-100 retro-btn">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i>Login to Register
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- No Events Message -->
+    <div id="noEventsMessage" class="text-center py-5" style="display: none;" data-aos="fade-up">
+        <i class="bi bi-calendar-x display-1 text-muted"></i>
+        <h3 class="text-muted mt-3 retro-heading">No Events Found</h3>
+        <p class="retro-text mb-4">Try adjusting your search criteria or filters</p>
+        <button class="btn btn-outline-dark retro-btn-outline" id="resetSearch">
+            <i class="bi bi-arrow-clockwise me-2"></i>Reset Search
+        </button>
+    </div>
+</div>
+
+<!-- Registration Modal -->
+<div class="modal fade" id="registrationModal" tabindex="-1" aria-labelledby="registrationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content retro-card">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold retro-heading" id="registrationModalLabel">Register for Event</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="registrationForm" method="POST">
+                <div class="modal-body">
+                    <div class="retro-card bg-light p-3 mb-4">
+                        <h6 class="fw-bold mb-2"><i class="bi bi-info-circle me-2"></i>Event Details</h6>
+                        <div id="eventInfo" class="text-muted small"></div>
+                    </div>
+                    
+                    <!-- Team Leader Section -->
+                    <div id="teamLeaderSection">
+                        <h6 class="fw-bold mb-3 retro-heading">
+                            <i class="bi bi-person-badge me-2"></i>Team Leader Information
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-medium">Full Name *</label>
+                                <input type="text" class="form-control retro-input" name="team_leader_name" 
+                                       value="{{ session.full_name if session.full_name else '' }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-medium">Email Address *</label>
+                                <input type="email" class="form-control retro-input" name="team_leader_email" 
+                                       value="{{ session.email if session.email else '' }}" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-medium">Phone Number *</label>
+                                <input type="tel" class="form-control retro-input" name="team_leader_phone" required 
+                                       pattern="[0-9]{10}" placeholder="10-digit mobile number">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-medium">PRN Number *</label>
+                                <input type="text" class="form-control retro-input" name="team_leader_prn" required 
+                                       placeholder="Your PRN/Student ID">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-medium">Class *</label>
+                                <input type="text" class="form-control retro-input" name="team_leader_class" required 
+                                       placeholder="e.g., FY B.Tech, SY B.Sc">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-medium">Branch *</label>
+                                <input type="text" class="form-control retro-input" name="team_leader_branch" required 
+                                       placeholder="e.g., Computer Science">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Address *</label>
+                            <textarea class="form-control retro-input" name="team_leader_address" rows="2" required 
+                                      placeholder="Your complete address"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Team Members Section -->
+                    <div id="teamMembersSection" style="display: none;">
+                        <h6 class="fw-bold mb-3 retro-heading mt-4">
+                            <i class="bi bi-people me-2"></i>Team Members Information
+                        </h6>
+                        <div id="teamMembersContainer">
+                            <!-- Team members will be dynamically added here -->
+                        </div>
+                    </div>
+
+                    <!-- Individual Registration Section -->
+                    <div id="individualSection">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Number of Participants *</label>
+                            <input type="number" class="form-control retro-input" name="num_participants" 
+                                   id="numParticipants" value="1" min="1" max="1" required>
+                            <div class="form-text text-muted" id="participantsHelp">
+                                Individual participation only
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Summary -->
+                    <div id="paymentSummarySection" style="display: none;">
+                        <div class="retro-card bg-light p-3 mt-4">
+                            <h6 class="fw-bold mb-3 retro-heading">
+                                <i class="bi bi-credit-card me-2"></i>Payment Summary
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Event Fee per person:</span>
+                                        <span id="feePerPerson">₹0</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Number of Participants:</span>
+                                        <span id="totalParticipants">1</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>Subtotal:</span>
+                                        <span id="subtotalAmount">₹0</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span>GST (18%):</span>
+                                        <span id="gstAmount">₹0</span>
+                                    </div>
+                                    <hr>
+                                    <div class="d-flex justify-content-between fw-bold">
+                                        <span>Total Amount:</span>
+                                        <span id="totalAmount">₹0</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="payment_method" id="creditCard" value="credit_card" checked>
+                                        <label class="form-check-label fw-medium" for="creditCard">
+                                            <i class="bi bi-credit-card me-2"></i>Credit/Debit Card
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="payment_method" id="upi" value="upi">
+                                        <label class="form-check-label fw-medium" for="upi">
+                                            <i class="bi bi-wallet me-2"></i>UPI Payment
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="payment_method" id="netbanking" value="netbanking">
+                                        <label class="form-check-label fw-medium" for="netbanking">
+                                            <i class="bi bi-bank me-2"></i>Net Banking
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-outline-dark retro-btn-outline" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-2"></i>Cancel
+                    </button>
+                    <button type="submit" class="btn btn-dark retro-btn" id="submitRegistration">
+                        <i class="bi bi-check-lg me-2"></i>Complete Registration
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content retro-card">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold retro-heading">Complete Payment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <div class="feature-icon mx-auto mb-3">
+                        <i class="bi bi-credit-card fs-3"></i>
+                    </div>
+                    <h6 class="fw-bold">Secure Payment Gateway</h6>
+                    <p class="retro-text mb-0">Complete your event registration</p>
+                </div>
+                
+                <div class="retro-card bg-light p-3 mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Event Fee:</span>
+                        <span id="modalEventFee">₹0</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>GST (18%):</span>
+                        <span id="modalGst">₹0</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold">
+                        <span>Total Amount:</span>
+                        <span id="modalTotal">₹0</span>
+                    </div>
+                </div>
+                
+                <div id="creditCardForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Card Number</label>
+                        <input type="text" class="form-control retro-input" placeholder="1234 5678 9012 3456" value="4111 1111 1111 1111">
+                    </div>
+                    
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium">Expiry Date</label>
+                            <input type="text" class="form-control retro-input" placeholder="MM/YY" value="12/25">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium">CVV</label>
+                            <input type="text" class="form-control retro-input" placeholder="123" value="123">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Cardholder Name</label>
+                        <input type="text" class="form-control retro-input" placeholder="John Doe" value="Test User">
+                    </div>
+                </div>
+
+                <div id="upiForm" style="display: none;">
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">UPI ID</label>
+                        <input type="text" class="form-control retro-input" placeholder="yourname@upi" value="test@okicici">
+                    </div>
+                    <div class="alert retro-card bg-light">
+                        <i class="bi bi-info-circle me-2"></i>
+                        You will be redirected to your UPI app to complete the payment.
+                    </div>
+                </div>
+
+                <div id="netbankingForm" style="display: none;">
+                    <div class="mb-3">
+                        <label class="form-label fw-medium">Select Bank</label>
+                        <select class="form-select retro-input">
+                            <option>State Bank of India</option>
+                            <option>HDFC Bank</option>
+                            <option>ICICI Bank</option>
+                            <option>Axis Bank</option>
+                            <option>Punjab National Bank</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="button" class="btn btn-dark w-100 retro-btn" id="processPaymentBtn">
+                    <i class="bi bi-lock me-2"></i>Pay Now
+                </button>
+                
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        <i class="bi bi-shield-check me-1"></i>
+                        Your payment is secure and encrypted
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const eventSearch = document.getElementById('eventSearch');
+    const eventSort = document.getElementById('eventSort');
+    const eventsContainer = document.getElementById('eventsContainer');
+    const noEventsMessage = document.getElementById('noEventsMessage');
+    const eventItems = document.querySelectorAll('.event-item');
+    const registrationModal = document.getElementById('registrationModal');
+    const registrationForm = document.getElementById('registrationForm');
+    const eventInfo = document.getElementById('eventInfo');
+    const numParticipants = document.getElementById('numParticipants');
+    const participantsHelp = document.getElementById('participantsHelp');
+    const submitRegistration = document.getElementById('submitRegistration');
+    const teamLeaderSection = document.getElementById('teamLeaderSection');
+    const teamMembersSection = document.getElementById('teamMembersSection');
+    const teamMembersContainer = document.getElementById('teamMembersContainer');
+    const individualSection = document.getElementById('individualSection');
+    const paymentSummarySection = document.getElementById('paymentSummarySection');
+    const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+
+    // Initialize AOS animations
+    AOS.init({
+        duration: 800,
+        once: true,
+        offset: 100
+    });
+
+    // Bootstrap modal instance
+    const modal = new bootstrap.Modal(registrationModal);
+
+    // Reset modal state when hidden
+    registrationModal.addEventListener('hidden.bs.modal', function() {
+        console.log('Modal hidden - resetting state');
+        registrationForm.reset();
+        submitRegistration.disabled = false;
+        submitRegistration.innerHTML = '<i class="bi bi-check-lg me-2"></i>Complete Registration';
+        
+        // Reset form fields to default values
+        const fullNameField = registrationForm.querySelector('input[name="team_leader_name"]');
+        const emailField = registrationForm.querySelector('input[name="team_leader_email"]');
+        
+        if (fullNameField) {
+            fullNameField.value = "{{ session.full_name if session.full_name else '' }}";
+        }
+        if (emailField) {
+            emailField.value = "{{ session.email if session.email else '' }}";
+        }
+        
+        // Hide team sections
+        teamMembersSection.style.display = 'none';
+        paymentSummarySection.style.display = 'none';
+    });
+
+    // Event listener for register buttons
+    document.addEventListener('click', function(e) {
+        const registerBtn = e.target.closest('.register-btn');
+        
+        if (registerBtn) {
+            console.log('Register button clicked');
+            
+            const eventId = registerBtn.dataset.eventId;
+            const eventTitle = registerBtn.dataset.eventTitle;
+            const isTeam = registerBtn.dataset.isTeam === 'true';
+            const teamSize = parseInt(registerBtn.dataset.teamSize);
+            const eventFee = parseFloat(registerBtn.dataset.eventFee);
+            const eventDate = registerBtn.dataset.eventDate;
+            const eventTime = registerBtn.dataset.eventTime;
+            const eventVenue = registerBtn.dataset.eventVenue;
+            const requireTeamLeader = registerBtn.dataset.requireTeamLeader === 'true';
+            const collectParticipantInfo = registerBtn.dataset.collectParticipantInfo === 'true';
+            const paymentMode = registerBtn.dataset.paymentMode;
+
+            console.log('Event data:', { eventId, eventTitle, isTeam, teamSize, eventFee });
+
+            // Update modal title
+            document.getElementById('registrationModalLabel').textContent = `Register for ${eventTitle}`;
+            
+            // Update event info
+            eventInfo.innerHTML = `
+                <div class="d-flex align-items-center mb-1">
+                    <i class="bi bi-calendar-event me-2"></i>
+                    <span><strong>Date & Time:</strong> ${eventDate} at ${eventTime}</span>
+                </div>
+                <div class="d-flex align-items-center mb-1">
+                    <i class="bi bi-geo-alt me-2"></i>
+                    <span><strong>Venue:</strong> ${eventVenue}</span>
+                </div>
+                <div class="d-flex align-items-center mb-1">
+                    <i class="bi bi-currency-rupee me-2"></i>
+                    <span><strong>Fee:</strong> ₹${eventFee}</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-people me-2"></i>
+                    <span><strong>Type:</strong> ${isTeam ? 'Team Event' : 'Individual Event'}</span>
+                </div>
+            `;
+
+            // Handle team vs individual registration
+            if (isTeam) {
+                individualSection.style.display = 'none';
+                teamLeaderSection.style.display = 'block';
+                
+                // Update participants field for team
+                numParticipants.max = teamSize;
+                numParticipants.value = Math.min(1, teamSize);
+                participantsHelp.textContent = `Maximum ${teamSize} participants per team`;
+                
+                // Show team members section if required
+                if (collectParticipantInfo) {
+                    teamMembersSection.style.display = 'block';
+                    generateTeamMembersFields(teamSize);
+                } else {
+                    teamMembersSection.style.display = 'none';
+                }
+                
+                // Update team leader section title based on payment mode
+                if (paymentMode === 'team') {
+                    teamLeaderSection.querySelector('h6').innerHTML = '<i class="bi bi-person-badge me-2"></i>Team Leader Information (Payer)';
+                }
+            } else {
+                individualSection.style.display = 'block';
+                teamLeaderSection.style.display = 'none';
+                teamMembersSection.style.display = 'none';
+                numParticipants.max = 1;
+                numParticipants.value = 1;
+                participantsHelp.textContent = 'Individual participation only';
+            }
+
+            // Show payment summary if fee > 0
+            if (eventFee > 0) {
+                paymentSummarySection.style.display = 'block';
+                updatePaymentSummary(eventFee, 1, isTeam, paymentMode);
+            } else {
+                paymentSummarySection.style.display = 'none';
+            }
+
+            // Update form action
+            registrationForm.action = `/events/${eventId}/register`;
+            console.log('Form action set to:', registrationForm.action);
+
+            // Store event data for dynamic updates
+            registrationForm.dataset.eventFee = eventFee;
+            registrationForm.dataset.isTeam = isTeam;
+            registrationForm.dataset.paymentMode = paymentMode;
+            registrationForm.dataset.teamSize = teamSize;
+
+            // Reset form validation
+            const invalidFields = registrationForm.querySelectorAll('.is-invalid');
+            invalidFields.forEach(field => field.classList.remove('is-invalid'));
+
+            // Show modal
+            modal.show();
+        }
+    });
+
+    // Generate team member fields
+    function generateTeamMembersFields(teamSize) {
+        teamMembersContainer.innerHTML = '';
+        
+        for (let i = 2; i <= teamSize; i++) {
+            const memberHtml = `
+                <div class="team-member-card retro-card p-3 mb-3" data-member-index="${i}">
+                    <h6 class="fw-bold mb-3">Team Member ${i}</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label fw-medium">Full Name *</label>
+                            <input type="text" class="form-control retro-input" name="team_member_${i}_name" required>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label fw-medium">Email Address *</label>
+                            <input type="email" class="form-control retro-input" name="team_member_${i}_email" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label fw-medium">Phone Number *</label>
+                            <input type="tel" class="form-control retro-input" name="team_member_${i}_phone" required 
+                                   pattern="[0-9]{10}" placeholder="10-digit mobile number">
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label fw-medium">PRN Number *</label>
+                            <input type="text" class="form-control retro-input" name="team_member_${i}_prn" required 
+                                   placeholder="PRN/Student ID">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label fw-medium">Class *</label>
+                            <input type="text" class="form-control retro-input" name="team_member_${i}_class" required 
+                                   placeholder="e.g., FY B.Tech">
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label fw-medium">Branch *</label>
+                            <input type="text" class="form-control retro-input" name="team_member_${i}_branch" required 
+                                   placeholder="e.g., Computer Science">
+                        </div>
+                    </div>
+                </div>
+            `;
+            teamMembersContainer.insertAdjacentHTML('beforeend', memberHtml);
+        }
+    }
+
+    // Update payment summary
+    function updatePaymentSummary(fee, participants, isTeam, paymentMode) {
+        const subtotal = fee * participants;
+        const gst = subtotal * 0.18;
+        const total = subtotal + gst;
+
+        document.getElementById('feePerPerson').textContent = `₹${fee.toFixed(2)}`;
+        document.getElementById('totalParticipants').textContent = participants;
+        document.getElementById('subtotalAmount').textContent = `₹${subtotal.toFixed(2)}`;
+        document.getElementById('gstAmount').textContent = `₹${gst.toFixed(2)}`;
+        document.getElementById('totalAmount').textContent = `₹${total.toFixed(2)}`;
+
+        // Update modal amounts
+        document.getElementById('modalEventFee').textContent = `₹${subtotal.toFixed(2)}`;
+        document.getElementById('modalGst').textContent = `₹${gst.toFixed(2)}`;
+        document.getElementById('modalTotal').textContent = `₹${total.toFixed(2)}`;
+    }
+
+    // Update payment summary when participants change
+    numParticipants.addEventListener('input', function() {
+        const fee = parseFloat(registrationForm.dataset.eventFee) || 0;
+        const participants = parseInt(this.value) || 1;
+        const isTeam = registrationForm.dataset.isTeam === 'true';
+        const paymentMode = registrationForm.dataset.paymentMode;
+        
+        if (fee > 0) {
+            updatePaymentSummary(fee, participants, isTeam, paymentMode);
+        }
+    });
+
+    // Payment method change
+    document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            document.getElementById('creditCardForm').style.display = 'none';
+            document.getElementById('upiForm').style.display = 'none';
+            document.getElementById('netbankingForm').style.display = 'none';
+            
+            if (this.value === 'credit_card') {
+                document.getElementById('creditCardForm').style.display = 'block';
+            } else if (this.value === 'upi') {
+                document.getElementById('upiForm').style.display = 'block';
+            } else if (this.value === 'netbanking') {
+                document.getElementById('netbankingForm').style.display = 'block';
+            }
+        });
+    });
+
+    // Registration form submission
+    registrationForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        console.log('Form submission started');
+        
+        // Basic validation
+        let isValid = true;
+        const requiredFields = this.querySelectorAll('[required]');
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('is-invalid');
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+
+        if (!isValid) {
+            EventHub.showNotification('Please fill in all required fields.', 'error');
+            return;
+        }
+
+        const eventFee = parseFloat(this.dataset.eventFee) || 0;
+        
+        // If event has fee, show payment modal
+        if (eventFee > 0) {
+            modal.hide();
+            paymentModal.show();
+        } else {
+            // Free event - submit directly
+            submitRegistrationForm();
+        }
+    });
+
+    // Process payment
+    document.getElementById('processPaymentBtn').addEventListener('click', function() {
+        const btn = this;
+        const originalText = btn.innerHTML;
+        
+        btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Processing Payment...';
+        btn.disabled = true;
+        
+        // Simulate payment processing
+        setTimeout(() => {
+            btn.innerHTML = '<i class="bi bi-check-lg me-2"></i>Payment Successful!';
+            btn.classList.remove('btn-dark');
+            btn.classList.add('btn-success');
+            
+            setTimeout(() => {
+                paymentModal.hide();
+                submitRegistrationForm();
+                
+                // Reset button
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-dark');
+                }, 1000);
+            }, 1500);
+        }, 2000);
+    });
+
+    // Submit registration form
+    function submitRegistrationForm() {
+        submitRegistration.disabled = true;
+        submitRegistration.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Registering...';
+
+        const formData = new FormData(registrationForm);
+        const eventId = registrationForm.action.split('/').pop();
+        
+        console.log('Submitting form for event:', eventId);
+
+        fetch(registrationForm.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            console.log('Response received:', response.status);
+            
+            if (response.redirected) {
+                window.location.href = response.url;
+                return null;
+            }
+            
+            if (response.ok) {
+                return response.json();
+            }
+            
+            throw new Error('Network response was not ok');
+        })
+        .then(data => {
+            if (data) {
+                if (data.success) {
+                    EventHub.showNotification(data.success, 'success');
+                    setTimeout(() => {
+                        modal.hide();
+                    }, 1500);
+                } else if (data.error) {
+                    EventHub.showNotification(data.error, 'error');
+                    submitRegistration.disabled = false;
+                    submitRegistration.innerHTML = '<i class="bi bi-check-lg me-2"></i>Complete Registration';
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Registration error:', error);
+            EventHub.showNotification('Registration failed. Please try again.', 'error');
+            submitRegistration.disabled = false;
+            submitRegistration.innerHTML = '<i class="bi bi-check-lg me-2"></i>Complete Registration';
+        });
+    }
+
+    // Filter functionality
+    function filterEvents() {
+        const searchTerm = eventSearch.value.toLowerCase();
+        const sortBy = eventSort.value;
+
+        let visibleCount = 0;
+        const eventsArray = Array.from(eventItems);
+
+        // Filter events
+        eventsArray.forEach(item => {
+            const eventName = item.dataset.name;
+            const eventDescription = item.dataset.description;
+            const eventVenue = item.dataset.venue;
+
+            let matchesSearch = eventName.includes(searchTerm) || 
+                              eventDescription.includes(searchTerm) || 
+                              eventVenue.includes(searchTerm);
+
+            if (matchesSearch) {
+                item.style.display = 'block';
+                visibleCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        // Sort events
+        if (sortBy !== 'date') {
+            const visibleEvents = eventsArray.filter(item => item.style.display !== 'none');
+            const container = eventsContainer;
+            
+            visibleEvents.sort((a, b) => {
+                if (sortBy === 'name') {
+                    return a.dataset.name.localeCompare(b.dataset.name);
+                } else if (sortBy === 'price-low') {
+                    return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+                } else if (sortBy === 'price-high') {
+                    return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+                }
+                return 0;
+            });
+
+            // Reorder DOM elements
+            visibleEvents.forEach(item => {
+                container.appendChild(item);
+            });
+        }
+
+        // Show/hide no events message
+        if (visibleCount === 0) {
+            noEventsMessage.style.display = 'block';
+        } else {
+            noEventsMessage.style.display = 'none';
+        }
+    }
+
+    // Event listeners for search and filter
+    eventSearch.addEventListener('input', EventHub.debounce(filterEvents, 300));
+    eventSort.addEventListener('change', filterEvents);
+
+    document.getElementById('resetSearch')?.addEventListener('click', function() {
+        eventSearch.value = '';
+        eventSort.value = 'date';
+        filterEvents();
+        eventSearch.focus();
+    });
+
+    // Initial filter
+    filterEvents();
+
+    // Add hover effects to cards
+    const cards = document.querySelectorAll('.retro-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.transition = 'transform 0.3s ease';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
+</script>
+
+<style>
+.feature-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--light-grey);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--dark-grey);
+}
+
+.team-member-card {
+    border-left: 4px solid var(--primary-color);
+}
+
+.payment-method-card {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.payment-method-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 2rem 1.5rem !important;
+    }
+    
+    .team-member-card .row {
+        margin-bottom: 0.5rem;
+    }
+    
+    .team-member-card .mb-2 {
+        margin-bottom: 0.5rem !important;
+    }
+}
+
+/* Smooth transitions */
+.team-member-card,
+.payment-summary-section {
+    transition: all 0.3s ease;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,1832 @@
+{% extends "base.html" %}
+
+{% block title %}Check-in - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5 mt-4">
+    <!-- Header Section -->
+    <div class="row mb-5" data-aos="fade-up" data-aos-duration="600">
+        <div class="col-12 text-center">
+            <h1 class="display-5 fw-bold mb-1 retro-heading mt-3">Participant <span class="retro-accent">Check-in</span></h1>
+            <p class="lead retro-text">Fast and efficient participant check-in system</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- QR Scanner Section -->
+        <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-duration="600" data-aos-delay="100">
+            <div class="card retro-card h-100">
+                <div class="card-header border-bottom py-4">
+                    <div class="d-flex align-items-center">
+                        <div class="feature-icon me-3">
+                            <i class="bi bi-qr-code-scan fs-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-bold retro-heading mb-1">QR Code Scanner</h4>
+                            <p class="retro-text mb-0">Automatic QR scanning - Fast & contactless</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Scanner Status -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-medium retro-text">Scanner Status:</span>
+                                <span class="badge retro-badge-success" id="scannerStatus">Ready</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Event Selection -->
+                    <div class="mb-4">
+                        <label class="form-label fw-medium">Select Event *</label>
+                        <select class="form-select retro-input" id="scannerEventSelect" required>
+                            <option value="">Choose an event...</option>
+                            {% for event in events %}
+                            <option value="{{ event._id }}">{{ event.title }} ({{ event.date }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Scanner Container -->
+                    <div class="scanner-container mb-4">
+                        <div class="scanner-wrapper retro-card bg-light p-3">
+                            <div id="cameraPreview">
+                                <div class="camera-placeholder" id="cameraPlaceholder">
+                                    <i class="bi bi-camera-video fs-1 text-muted mb-3"></i>
+                                    <p class="text-muted mb-2">Camera preview will appear here</p>
+                                    <small class="text-muted">Click "Start Camera" to begin</small>
+                                </div>
+                                <video id="qrVideo" autoplay muted playsinline style="display: none;"></video>
+                                <canvas id="qrCanvas" style="display: none;"></canvas>
+                            </div>
+                            <div class="scanner-overlay" style="display: none;">
+                                <div class="scanner-frame"></div>
+                                <div class="scanner-laser"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Debug Info -->
+                    <div class="debug-info mb-3" style="display: none;" id="debugInfo">
+                        <small class="text-muted" id="debugText"></small>
+                    </div>
+
+                    <!-- Scanner States -->
+                    <div class="text-center">
+                        <!-- Initial State -->
+                        <div class="scanner-initial" id="scannerInitial">
+                            <div class="feature-icon mx-auto mb-3 bg-primary">
+                                <i class="bi bi-camera fs-3 text-white"></i>
+                            </div>
+                            <h6 class="fw-bold retro-heading mb-2">Camera Ready</h6>
+                            <p class="retro-text mb-3">Click the button below to start the camera</p>
+                            <button class="btn btn-dark retro-btn" onclick="initializeScanner()" id="startCameraBtn">
+                                <i class="bi bi-camera-video me-2"></i>Start Camera
+                            </button>
+                            <div class="mt-3">
+                                <small class="text-muted">You'll be asked for camera permission</small>
+                            </div>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div class="scanner-loading" id="scannerLoading" style="display: none;">
+                            <div class="spinner-border retro-spinner mb-3" role="status">
+                                <span class="visually-hidden">Initializing scanner...</span>
+                            </div>
+                            <p class="retro-text mb-2">Initializing QR Scanner...</p>
+                            <small class="retro-text text-muted">Please allow camera access when prompted</small>
+                            <div class="mt-3">
+                                <button class="btn btn-outline-secondary btn-sm" onclick="cancelScannerInitialization()">
+                                    <i class="bi bi-x-circle me-2"></i>Cancel
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Error State -->
+                        <div class="scanner-error" id="scannerError" style="display: none;">
+                            <div class="feature-icon mx-auto mb-3 bg-danger">
+                                <i class="bi bi-camera-video-off fs-3 text-white"></i>
+                            </div>
+                            <h6 class="fw-bold retro-heading mb-2" id="errorTitle">Camera Access Required</h6>
+                            <p class="retro-text mb-3" id="errorMessage">Please allow camera access to use QR scanning</p>
+                            <div class="camera-troubleshoot mb-3 p-3 retro-card bg-light">
+                                <h6 class="fw-bold retro-heading mb-2">
+                                    <i class="bi bi-lightbulb me-2"></i>Quick Fixes
+                                </h6>
+                                <ul class="list-unstyled mb-0">
+                                    <li class="mb-1">
+                                        <small class="retro-text">
+                                            <i class="bi bi-check-circle me-1 text-success"></i>
+                                            Look for the camera permission popup
+                                        </small>
+                                    </li>
+                                    <li class="mb-1">
+                                        <small class="retro-text">
+                                            <i class="bi bi-check-circle me-1 text-success"></i>
+                                            Check browser address bar for camera icon
+                                        </small>
+                                    </li>
+                                    <li>
+                                        <small class="retro-text">
+                                            <i class="bi bi-check-circle me-1 text-success"></i>
+                                            Refresh page if no prompt appears
+                                        </small>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-dark retro-btn" onclick="initializeScanner()">
+                                    <i class="bi bi-arrow-clockwise me-2"></i>Retry Camera Access
+                                </button>
+                                <button class="btn btn-outline-dark retro-btn-outline" onclick="showCameraHelp()">
+                                    <i class="bi bi-info-circle me-2"></i>Troubleshoot Camera
+                                </button>
+                                <button class="btn btn-outline-secondary retro-btn-outline btn-sm" onclick="toggleDebug()">
+                                    <i class="bi bi-bug me-2"></i>Debug Info
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Active Scanner Stats -->
+                        <div class="scanner-stats" id="scannerStats" style="display: none;">
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <div class="stats-item">
+                                        <h5 class="fw-bold mb-1 text-primary" id="scansCount">0</h5>
+                                        <small class="retro-text">Total Scans</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="stats-item">
+                                        <h5 class="fw-bold mb-1 text-success" id="successCount">0</h5>
+                                        <small class="retro-text">Successful</small>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="stats-item">
+                                        <h5 class="fw-bold mb-1 text-info" id="lastScanTime">-</h5>
+                                        <small class="retro-text">Last Scan</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Scanner Tips -->
+                            <div class="scanner-tips mt-3 p-3 retro-card bg-light">
+                                <h6 class="fw-bold retro-heading mb-2">
+                                    <i class="bi bi-lightbulb me-2"></i>Scanning Tips
+                                </h6>
+                                <div class="row text-start">
+                                    <div class="col-12 mb-1">
+                                        <small class="retro-text">
+                                            <i class="bi bi-check-circle me-1 text-success"></i>
+                                            Ensure good lighting
+                                        </small>
+                                    </div>
+                                    <div class="col-12 mb-1">
+                                        <small class="retro-text">
+                                            <i class="bi bi-check-circle me-1 text-success"></i>
+                                            Hold steady 15-20cm away
+                                        </small>
+                                    </div>
+                                    <div class="col-12">
+                                        <small class="retro-text">
+                                            <i class="bi bi-check-circle me-1 text-success"></i>
+                                            Center QR code in frame
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-outline-dark retro-btn-outline btn-sm mt-2" onclick="toggleScanner()">
+                                <i class="bi bi-pause-circle me-2"></i>Pause Scanner
+                            </button>
+                            <button class="btn btn-outline-danger retro-btn-outline btn-sm mt-2" onclick="stopScanner()">
+                                <i class="bi bi-stop-circle me-2"></i>Stop Camera
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manual Check-in Section (same as before) -->
+        <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-duration="600" data-aos-delay="200">
+            <div class="card retro-card h-100">
+                <div class="card-header border-bottom py-4">
+                    <div class="d-flex align-items-center">
+                        <div class="feature-icon me-3">
+                            <i class="bi bi-keyboard fs-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-bold retro-heading mb-1">Manual Check-in</h4>
+                            <p class="retro-text mb-0">Search and check-in participants manually</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" id="checkinForm">
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Select Event *</label>
+                            <select class="form-select retro-input" name="event_id" id="eventSelect" required>
+                                <option value="">Choose an event...</option>
+                                {% for event in events %}
+                                <option value="{{ event._id }}">{{ event.title }} ({{ event.date }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Search By *</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="form-check retro-card bg-light p-3">
+                                        <input class="form-check-input" type="radio" name="search_type" 
+                                               id="searchPRN" value="prn" checked>
+                                        <label class="form-check-label fw-medium" for="searchPRN">
+                                            <i class="bi bi-person-badge me-2"></i>PRN Number
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-check retro-card bg-light p-3">
+                                        <input class="form-check-input" type="radio" name="search_type" 
+                                               id="searchName" value="name">
+                                        <label class="form-check-label fw-medium" for="searchName">
+                                            <i class="bi bi-person me-2"></i>Full Name
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-medium" id="searchLabel">PRN Number *</label>
+                            <input type="text" class="form-control retro-input" name="search_value" 
+                                   id="searchInput" required placeholder="Enter PRN number...">
+                            <div class="form-text retro-text" id="searchHelp">
+                                Enter the participant's PRN number to search for registration
+                            </div>
+                        </div>
+
+                        <!-- Search Results -->
+                        <div class="search-results mb-3" id="searchResults" style="display: none;">
+                            <!-- Results will be populated here -->
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-dark retro-btn" id="checkinSubmit">
+                                <i class="bi bi-search me-2"></i>Search & Check-in
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Quick Stats -->
+                    <div class="row mt-4 text-center">
+                        <div class="col-4">
+                            <div class="stats-card retro-card p-2">
+                                <h5 class="fw-bold mb-1 text-primary" id="totalRegistrations">0</h5>
+                                <small class="retro-text">Total</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stats-card retro-card p-2">
+                                <h5 class="fw-bold mb-1 text-success" id="checkedInCount">0</h5>
+                                <small class="retro-text">Checked In</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stats-card retro-card p-2">
+                                <h5 class="fw-bold mb-1 text-warning" id="pendingCount">0</h5>
+                                <small class="retro-text">Pending</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Check-ins Section (same as before) -->
+    <div class="row mt-4" data-aos="fade-up" data-aos-duration="600" data-aos-delay="300">
+        <div class="col-12">
+            <div class="card retro-card">
+                <div class="card-header border-bottom py-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="feature-icon me-3">
+                                <i class="bi bi-clock-history fs-4"></i>
+                            </div>
+                            <div>
+                                <h4 class="fw-bold retro-heading mb-1">Recent Check-ins</h4>
+                                <p class="retro-text mb-0">Latest participant check-ins</p>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline-dark retro-btn-outline btn-sm" onclick="loadRecentCheckins()">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="recent-checkins" id="recentCheckins">
+                        <div class="text-center py-4">
+                            <i class="bi bi-info-circle display-4 text-muted mb-3"></i>
+                            <p class="retro-text">No recent check-ins to display</p>
+                            <small class="retro-text">Select an event to see check-ins</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Check-in Success Modal -->
+<div class="modal fade" id="checkinSuccessModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content retro-card">
+            <div class="modal-body text-center py-4">
+                <div class="feature-icon mx-auto mb-3 bg-success">
+                    <i class="bi bi-check-lg fs-3 text-white"></i>
+                </div>
+                <h4 class="fw-bold retro-heading mb-3">Check-in Successful!</h4>
+                <p class="retro-text" id="successMessage">Participant has been checked in successfully.</p>
+                <button type="button" class="btn btn-dark retro-btn w-100" data-bs-dismiss="modal">
+                    Continue
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Camera Help Modal -->
+<div class="modal fade" id="cameraHelpModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content retro-card">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold retro-heading">Camera Troubleshooting Guide</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <h6 class="fw-bold retro-heading mb-3">
+                            <i class="bi bi-shield-check me-2"></i>Permission Issues
+                        </h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                <strong>Allow camera access</strong> when prompted
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Check browser settings for camera permissions
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Look for camera icon in address bar
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <h6 class="fw-bold retro-heading mb-3">
+                            <i class="bi bi-camera me-2"></i>Camera Issues
+                        </h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Ensure camera is not used by another app
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Check if camera is physically blocked
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Try refreshing the page
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Note:</strong> 
+                            <ul class="mb-0 mt-2">
+                                <li>QR scanning requires HTTPS connection</li>
+                                <li>Some browsers require explicit permission grants</li>
+                                <li>If no prompt appears, check your browser's permission settings</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-dark" onclick="initializeScanner()">
+                    <i class="bi bi-arrow-clockwise me-2"></i>Try Again
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script>
+// Global variables
+let scannerActive = false;
+let videoStream = null;
+let scanAnimationFrame = null;
+let scanCount = 0;
+let successCount = 0;
+let lastScanTime = null;
+let currentEventId = null;
+let scanCooldown = false;
+let lastScanResult = null;
+let debugMode = false;
+let scannerInitializing = false;
+let cameraActive = false;
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing Check-in System...');
+    
+    // Set up event listeners first
+    setupEventListeners();
+    
+    // Initialize search functionality
+    initializeSearch();
+    
+    // Show initial state (don't auto-start camera)
+    updateScannerUI('initial');
+});
+
+function updateDebugInfo(message) {
+    if (debugMode) {
+        const debugInfo = document.getElementById('debugInfo');
+        const debugText = document.getElementById('debugText');
+        debugInfo.style.display = 'block';
+        debugText.textContent = message;
+        console.log('DEBUG:', message);
+    }
+}
+
+function toggleDebug() {
+    debugMode = !debugMode;
+    const debugInfo = document.getElementById('debugInfo');
+    debugInfo.style.display = debugMode ? 'block' : 'none';
+    if (debugMode) {
+        updateDebugInfo('Debug mode enabled. Check console for detailed logs.');
+    }
+}
+
+// Scanner state management
+function updateScannerUI(state) {
+    const initial = document.getElementById('scannerInitial');
+    const loading = document.getElementById('scannerLoading');
+    const error = document.getElementById('scannerError');
+    const stats = document.getElementById('scannerStats');
+    const status = document.getElementById('scannerStatus');
+    const scannerOverlay = document.querySelector('.scanner-overlay');
+    const qrVideo = document.getElementById('qrVideo');
+    const cameraPlaceholder = document.getElementById('cameraPlaceholder');
+
+    // Hide all states first
+    initial.style.display = 'none';
+    loading.style.display = 'none';
+    error.style.display = 'none';
+    stats.style.display = 'none';
+
+    switch(state) {
+        case 'initial':
+            initial.style.display = 'block';
+            status.textContent = 'Ready';
+            status.className = 'badge retro-badge-success';
+            cameraPlaceholder.style.display = 'flex';
+            qrVideo.style.display = 'none';
+            scannerOverlay.style.display = 'none';
+            break;
+        case 'loading':
+            loading.style.display = 'block';
+            status.textContent = 'Initializing...';
+            status.className = 'badge retro-badge-warning';
+            cameraPlaceholder.style.display = 'flex';
+            qrVideo.style.display = 'none';
+            scannerOverlay.style.display = 'none';
+            break;
+        case 'error':
+            error.style.display = 'block';
+            status.textContent = 'Camera Error';
+            status.className = 'badge retro-badge-error';
+            cameraPlaceholder.style.display = 'flex';
+            qrVideo.style.display = 'none';
+            scannerOverlay.style.display = 'none';
+            break;
+        case 'active':
+            stats.style.display = 'block';
+            status.textContent = 'Scanning...';
+            status.className = 'badge retro-badge-success';
+            cameraPlaceholder.style.display = 'none';
+            qrVideo.style.display = 'block';
+            scannerOverlay.style.display = 'block';
+            break;
+        case 'paused':
+            stats.style.display = 'block';
+            status.textContent = 'Paused';
+            status.className = 'badge retro-badge-warning';
+            cameraPlaceholder.style.display = 'none';
+            qrVideo.style.display = 'block';
+            scannerOverlay.style.display = 'block';
+            break;
+    }
+}
+
+function setupEventListeners() {
+    const eventSelect = document.getElementById('eventSelect');
+    const scannerEventSelect = document.getElementById('scannerEventSelect');
+    const searchPRN = document.getElementById('searchPRN');
+    const searchName = document.getElementById('searchName');
+
+    // Update search field based on selection
+    function updateSearchField() {
+        const searchLabel = document.getElementById('searchLabel');
+        const searchInput = document.getElementById('searchInput');
+        const searchHelp = document.getElementById('searchHelp');
+        
+        if (searchPRN.checked) {
+            searchLabel.textContent = 'PRN Number *';
+            searchInput.placeholder = 'Enter PRN number...';
+            searchHelp.textContent = 'Enter the participant\'s PRN number to search for registration';
+        } else {
+            searchLabel.textContent = 'Full Name *';
+            searchInput.placeholder = 'Enter full name...';
+            searchHelp.textContent = 'Enter the participant\'s full name to search for registration';
+        }
+        document.getElementById('searchResults').style.display = 'none';
+    }
+
+    searchPRN.addEventListener('change', updateSearchField);
+    searchName.addEventListener('change', updateSearchField);
+
+    // Manual check-in form submission
+    document.getElementById('checkinForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        performManualCheckIn();
+    });
+
+    // Load event statistics when event is selected
+    eventSelect.addEventListener('change', function() {
+        currentEventId = this.value;
+        if (currentEventId) {
+            loadEventStats(currentEventId);
+            loadRecentCheckins(currentEventId);
+        } else {
+            clearStats();
+            clearRecentCheckins();
+        }
+    });
+
+    // Sync event selection between scanner and manual
+    eventSelect.addEventListener('change', function() {
+        scannerEventSelect.value = this.value;
+        currentEventId = this.value;
+    });
+
+    scannerEventSelect.addEventListener('change', function() {
+        eventSelect.value = this.value;
+        currentEventId = this.value;
+        if (this.value) {
+            loadEventStats(this.value);
+            loadRecentCheckins(this.value);
+        } else {
+            clearStats();
+            clearRecentCheckins();
+        }
+    });
+
+    // Initial setup
+    updateSearchField();
+}
+
+function initializeSearch() {
+    const searchInput = document.getElementById('searchInput');
+    
+    // Real-time search for manual check-in
+    searchInput.addEventListener('input', EventHub.debounce(function() {
+        const eventId = document.getElementById('eventSelect').value;
+        const searchType = document.getElementById('searchPRN').checked ? 'prn' : 'name';
+        const searchValue = this.value.trim();
+
+        if (eventId && searchValue.length >= 2) {
+            searchRegistrations(eventId, searchType, searchValue);
+        } else {
+            document.getElementById('searchResults').style.display = 'none';
+        }
+    }, 300));
+}
+
+async function initializeScanner() {
+    if (scannerInitializing || cameraActive) return;
+    
+    scannerInitializing = true;
+    updateScannerUI('loading');
+    updateDebugInfo('Starting camera initialization...');
+    
+    // Disable start button during initialization
+    const startBtn = document.getElementById('startCameraBtn');
+    startBtn.disabled = true;
+    startBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Initializing...';
+    
+    try {
+        // Stop existing stream if any
+        if (videoStream) {
+            stopCameraStream();
+        }
+
+        // Check if mediaDevices is available
+        if (!navigator.mediaDevices) {
+            throw new Error('navigator.mediaDevices not available - may not be HTTPS');
+        }
+
+        if (!navigator.mediaDevices.getUserMedia) {
+            throw new Error('getUserMedia not supported in this browser');
+        }
+
+        // Check camera permissions first
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            updateDebugInfo(`Found ${videoDevices.length} camera device(s)`);
+            
+            if (videoDevices.length === 0) {
+                throw new Error('No camera devices found');
+            }
+        } catch (error) {
+            updateDebugInfo('Camera enumeration error: ' + error.message);
+        }
+
+        // Simple camera configuration
+        const constraints = {
+            video: {
+                facingMode: 'environment',
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            },
+            audio: false
+        };
+
+        updateDebugInfo('Requesting camera access with constraints: ' + JSON.stringify(constraints));
+        
+        // Request camera access - this should trigger the permission prompt
+        videoStream = await navigator.mediaDevices.getUserMedia(constraints)
+            .catch(error => {
+                updateDebugInfo('getUserMedia error: ' + error.name + ' - ' + error.message);
+                throw error;
+            });
+        
+        if (!videoStream) {
+            throw new Error('No video stream received');
+        }
+
+        updateDebugInfo('Camera access granted, setting up video element...');
+        
+        const qrVideo = document.getElementById('qrVideo');
+        qrVideo.srcObject = videoStream;
+
+        // Add event listeners to track stream state
+        videoStream.getTracks().forEach(track => {
+            track.addEventListener('ended', () => {
+                updateDebugInfo('Camera track ended unexpectedly');
+                handleCameraStopped();
+            });
+            
+            track.addEventListener('mute', () => {
+                updateDebugInfo('Camera track muted');
+            });
+            
+            track.addEventListener('unmute', () => {
+                updateDebugInfo('Camera track unmuted');
+            });
+        });
+
+        // Wait for video to be ready with timeout
+        await new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+                reject(new Error('Video initialization timeout'));
+            }, 10000); // 10 second timeout
+
+            let resolved = false;
+
+            const resolveOnce = () => {
+                if (!resolved) {
+                    resolved = true;
+                    clearTimeout(timeout);
+                    updateDebugInfo('Video ready - dimensions: ' + qrVideo.videoWidth + 'x' + qrVideo.videoHeight);
+                    
+                    // Force video to display properly
+                    qrVideo.style.display = 'block';
+                    qrVideo.style.width = '100%';
+                    qrVideo.style.height = '100%';
+                    qrVideo.style.objectFit = 'cover';
+                    
+                    resolve();
+                }
+            };
+
+            qrVideo.onloadedmetadata = () => {
+                updateDebugInfo('Video metadata loaded');
+                resolveOnce();
+            };
+            
+            qrVideo.oncanplay = () => {
+                updateDebugInfo('Video can play');
+                resolveOnce();
+            };
+            
+            qrVideo.onerror = (error) => {
+                if (!resolved) {
+                    resolved = true;
+                    clearTimeout(timeout);
+                    updateDebugInfo('Video element error: ' + error);
+                    reject(new Error('Video element error'));
+                }
+            };
+
+            // Force check after 2 seconds
+            setTimeout(() => {
+                if (qrVideo.readyState >= qrVideo.HAVE_METADATA && !resolved) {
+                    resolveOnce();
+                }
+            }, 2000);
+        });
+
+        // Try to play the video
+        try {
+            await qrVideo.play();
+            updateDebugInfo('Video playback started successfully');
+            
+        } catch (playError) {
+            console.warn('Video play() failed:', playError);
+            updateDebugInfo('Video play warning: ' + playError.message);
+            // Continue anyway as the stream might still work
+        }
+
+        // Verify video is actually displaying and active
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Check if video stream is still active
+        const activeTracks = videoStream.getTracks().filter(track => track.readyState === 'live');
+        if (activeTracks.length === 0) {
+            throw new Error('Camera stream stopped unexpectedly');
+        }
+
+        if (qrVideo.readyState < qrVideo.HAVE_METADATA) {
+            throw new Error('Video not ready after initialization');
+        }
+
+        // Mark camera as active
+        cameraActive = true;
+        scannerActive = true;
+        
+        // Start scanning
+        updateScannerUI('active');
+        startHighPerformanceQRScanning();
+        
+        console.log('QR Scanner initialized successfully');
+        EventHub.showNotification('QR scanner ready! Point camera at QR code', 'success');
+        
+        // Monitor stream health
+        monitorStreamHealth();
+        
+    } catch (error) {
+        console.error('Scanner initialization error:', error);
+        handleCameraError(error);
+    } finally {
+        scannerInitializing = false;
+        const startBtn = document.getElementById('startCameraBtn');
+        startBtn.disabled = false;
+        startBtn.innerHTML = '<i class="bi bi-camera-video me-2"></i>Start Camera';
+    }
+}
+
+function stopCameraStream() {
+    if (videoStream) {
+        videoStream.getTracks().forEach(track => {
+            track.removeEventListener('ended', handleCameraStopped);
+            track.stop();
+        });
+        videoStream = null;
+    }
+    
+    const qrVideo = document.getElementById('qrVideo');
+    qrVideo.srcObject = null;
+    
+    cameraActive = false;
+    scannerActive = false;
+    
+    if (scanAnimationFrame) {
+        cancelAnimationFrame(scanAnimationFrame);
+        scanAnimationFrame = null;
+    }
+}
+
+function handleCameraStopped() {
+    updateDebugInfo('Camera stopped unexpectedly');
+    cameraActive = false;
+    scannerActive = false;
+    
+    if (scanAnimationFrame) {
+        cancelAnimationFrame(scanAnimationFrame);
+        scanAnimationFrame = null;
+    }
+    
+    updateScannerUI('error');
+    document.getElementById('errorTitle').textContent = 'Camera Disconnected';
+    document.getElementById('errorMessage').textContent = 'The camera stopped unexpectedly. Please try starting it again.';
+    
+    EventHub.showNotification('Camera disconnected', 'error');
+}
+
+function monitorStreamHealth() {
+    // Check stream health every 5 seconds
+    const healthCheck = setInterval(() => {
+        if (!cameraActive || !videoStream) {
+            clearInterval(healthCheck);
+            return;
+        }
+        
+        const activeTracks = videoStream.getTracks().filter(track => track.readyState === 'live');
+        if (activeTracks.length === 0) {
+            updateDebugInfo('Stream health check failed - no active tracks');
+            handleCameraStopped();
+            clearInterval(healthCheck);
+        } else {
+            updateDebugInfo(`Stream health: ${activeTracks.length} active track(s)`);
+        }
+    }, 5000);
+}
+
+function stopScanner() {
+    stopCameraStream();
+    updateScannerUI('initial');
+    EventHub.showNotification('Camera stopped', 'info');
+}
+
+function cancelScannerInitialization() {
+    if (scannerInitializing) {
+        scannerInitializing = false;
+        stopCameraStream();
+        updateScannerUI('initial');
+        
+        const startBtn = document.getElementById('startCameraBtn');
+        startBtn.disabled = false;
+        startBtn.innerHTML = '<i class="bi bi-camera-video me-2"></i>Start Camera';
+        
+        EventHub.showNotification('Camera initialization cancelled', 'info');
+    }
+}
+
+function handleCameraError(error) {
+    let errorTitle = 'Camera Access Required';
+    let errorMessage = 'Please allow camera access to use QR scanning';
+    
+    if (error.name === 'NotAllowedError') {
+        errorTitle = 'Camera Permission Denied';
+        errorMessage = 'Please allow camera access in your browser settings. Look for a camera icon in the address bar or check site permissions.';
+    } else if (error.name === 'NotFoundError') {
+        errorTitle = 'No Camera Found';
+        errorMessage = 'No camera detected on your device. Please check your camera connection.';
+    } else if (error.name === 'NotSupportedError') {
+        errorTitle = 'Browser Not Supported';
+        errorMessage = 'Your browser does not support camera access. Try Chrome, Firefox, or Safari.';
+    } else if (error.name === 'NotReadableError') {
+        errorTitle = 'Camera in Use';
+        errorMessage = 'Camera is already in use by another application. Please close other camera apps.';
+    } else if (error.message.includes('HTTPS')) {
+        errorTitle = 'HTTPS Required';
+        errorMessage = 'Camera access requires HTTPS connection. Please use a secure connection.';
+    } else if (error.message.includes('timeout')) {
+        errorTitle = 'Camera Timeout';
+        errorMessage = 'Camera took too long to initialize. Please try again.';
+    } else if (error.message.includes('mediaDevices')) {
+        errorTitle = 'Browser Compatibility';
+        errorMessage = 'Your browser does not support camera access. Try updating your browser or using a different one.';
+    } else if (error.message.includes('stopped')) {
+        errorTitle = 'Camera Disconnected';
+        errorMessage = 'Camera stopped unexpectedly. This might be due to browser restrictions or hardware issues.';
+    }
+    
+    document.getElementById('errorTitle').textContent = errorTitle;
+    document.getElementById('errorMessage').textContent = errorMessage;
+    updateScannerUI('error');
+    
+    EventHub.showNotification(errorTitle, 'error');
+}
+
+function toggleScanner() {
+    if (scannerActive) {
+        // Pause scanner
+        scannerActive = false;
+        if (scanAnimationFrame) {
+            cancelAnimationFrame(scanAnimationFrame);
+        }
+        updateScannerUI('paused');
+        EventHub.showNotification('Scanner paused', 'info');
+    } else {
+        // Resume scanner
+        scannerActive = true;
+        startHighPerformanceQRScanning();
+        updateScannerUI('active');
+        EventHub.showNotification('Scanner resumed', 'success');
+    }
+}
+
+function startHighPerformanceQRScanning() {
+    const qrVideo = document.getElementById('qrVideo');
+    const canvas = document.getElementById('qrCanvas');
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    
+    function scanFrame() {
+        if (!scannerActive || !videoStream || !cameraActive) {
+            scanAnimationFrame = requestAnimationFrame(scanFrame);
+            return;
+        }
+        
+        // Check if video stream is still active
+        const activeTracks = videoStream.getTracks().filter(track => track.readyState === 'live');
+        if (activeTracks.length === 0) {
+            updateDebugInfo('No active tracks during scanning');
+            handleCameraStopped();
+            return;
+        }
+        
+        try {
+            // Skip frames if in cooldown (prevent multiple rapid scans)
+            if (scanCooldown) {
+                scanAnimationFrame = requestAnimationFrame(scanFrame);
+                return;
+            }
+            
+            // Check if video has data
+            if (qrVideo.readyState !== qrVideo.HAVE_ENOUGH_DATA) {
+                scanAnimationFrame = requestAnimationFrame(scanFrame);
+                return;
+            }
+            
+            // Set canvas dimensions to match video
+            if (canvas.width !== qrVideo.videoWidth || canvas.height !== qrVideo.videoHeight) {
+                canvas.width = qrVideo.videoWidth;
+                canvas.height = qrVideo.videoHeight;
+                updateDebugInfo(`Canvas dimensions set to: ${canvas.width}x${canvas.height}`);
+            }
+            
+            // Draw video frame to canvas
+            context.drawImage(qrVideo, 0, 0, canvas.width, canvas.height);
+            
+            // Get image data from entire canvas for better detection
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            
+            // Use jsQR for QR code detection
+            const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                inversionAttempts: "dontInvert",
+            });
+            
+            if (code) {
+                scanCount++;
+                updateScanStats();
+                
+                // Prevent duplicate scans within 2 seconds
+                if (code.data !== lastScanResult) {
+                    lastScanResult = code.data;
+                    console.log('QR Code detected:', code.data);
+                    updateDebugInfo('QR detected: ' + code.data.substring(0, 50) + '...');
+                    
+                    // Set cooldown to prevent multiple scans
+                    scanCooldown = true;
+                    setTimeout(() => {
+                        scanCooldown = false;
+                    }, 2000);
+                    
+                    handleQRScanResult(code.data);
+                }
+            }
+            
+        } catch (error) {
+            console.error('QR scanning error:', error);
+            updateDebugInfo('Scan error: ' + error.message);
+        }
+        
+        // Continue scanning
+        scanAnimationFrame = requestAnimationFrame(scanFrame);
+    }
+    
+    // Start the scanning loop
+    scanAnimationFrame = requestAnimationFrame(scanFrame);
+}
+
+function updateScanStats() {
+    document.getElementById('scansCount').textContent = scanCount;
+    document.getElementById('successCount').textContent = successCount;
+    
+    if (lastScanTime) {
+        const now = new Date();
+        const diff = Math.floor((now - lastScanTime) / 1000);
+        if (diff < 10) {
+            document.getElementById('lastScanTime').textContent = 'Just now';
+        } else if (diff < 60) {
+            document.getElementById('lastScanTime').textContent = `${diff}s ago`;
+        } else {
+            document.getElementById('lastScanTime').textContent = `${Math.floor(diff / 60)}m ago`;
+        }
+    } else {
+        document.getElementById('lastScanTime').textContent = '-';
+    }
+}
+
+function handleQRScanResult(qrData) {
+    if (!qrData) return;
+    
+    const eventId = document.getElementById('scannerEventSelect').value;
+    if (!eventId) {
+        EventHub.showNotification('Please select an event first.', 'warning');
+        return;
+    }
+    
+    console.log('Processing QR data:', qrData);
+    updateDebugInfo('Processing QR data...');
+    
+    try {
+        let qrInfo;
+        
+        // Try to parse as JSON first
+        try {
+            qrInfo = JSON.parse(qrData);
+        } catch (e) {
+            // If not JSON, try to parse as key-value pairs
+            qrInfo = {};
+            const lines = qrData.split('\n').filter(line => line.trim());
+            lines.forEach(line => {
+                const [key, ...values] = line.split(':');
+                if (key && values.length > 0) {
+                    qrInfo[key.trim().toLowerCase()] = values.join(':').trim();
+                }
+            });
+        }
+        
+        // Check for valid QR data with multiple possible field names
+        const prn = qrInfo.prn || qrInfo.PRN || qrInfo.id || qrInfo.student_id;
+        const name = qrInfo.name || qrInfo.NAME || qrInfo.full_name || qrInfo.student_name;
+        
+        if (!prn && !name) {
+            EventHub.showNotification('Invalid QR code format. No PRN or name found.', 'error');
+            updateDebugInfo('Invalid QR: No PRN or name found');
+            return;
+        }
+        
+        // Perform check-in with QR code data
+        performQRCheckIn(eventId, { prn, name, ...qrInfo });
+        
+    } catch (error) {
+        console.error('QR data parsing error:', error);
+        EventHub.showNotification('Error reading QR code data.', 'error');
+        updateDebugInfo('QR parse error: ' + error.message);
+    }
+}
+
+// Check-in Functions (remain the same)
+async function performManualCheckIn() {
+    const eventId = document.getElementById('eventSelect').value;
+    const searchType = document.querySelector('input[name="search_type"]:checked').value;
+    const searchValue = document.getElementById('searchInput').value.trim();
+    const submitBtn = document.getElementById('checkinSubmit');
+
+    if (!eventId || !searchValue) {
+        EventHub.showNotification('Please select an event and enter search criteria.', 'error');
+        return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Checking in...';
+
+    try {
+        const response = await fetch('/api/checkin', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                event_id: eventId,
+                search_type: searchType,
+                search_value: searchValue,
+                checkin_method: 'manual'
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            successCount++;
+            lastScanTime = new Date();
+            updateScanStats();
+            showCheckinSuccess(result.participant_name, result.event_name);
+            // Reset form
+            document.getElementById('checkinForm').reset();
+            document.getElementById('searchResults').style.display = 'none';
+            // Reload stats and recent checkins
+            loadEventStats(eventId);
+            loadRecentCheckins(eventId);
+        } else {
+            EventHub.showNotification(result.error || 'Check-in failed.', 'error');
+        }
+        
+    } catch (error) {
+        console.error('Manual check-in error:', error);
+        EventHub.showNotification('Check-in failed. Please try again.', 'error');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bi bi-search me-2"></i>Search & Check-in';
+    }
+}
+
+async function performQRCheckIn(eventId, qrInfo) {
+    try {
+        const searchType = qrInfo.prn ? 'prn' : 'name';
+        const searchValue = qrInfo.prn || qrInfo.name;
+        
+        console.log('Performing QR check-in:', { eventId, searchType, searchValue });
+        updateDebugInfo(`QR check-in: ${searchType}=${searchValue}`);
+        
+        const response = await fetch('/api/checkin', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                event_id: eventId,
+                search_type: searchType,
+                search_value: searchValue,
+                checkin_method: 'qr',
+                qr_data: qrInfo
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            successCount++;
+            lastScanTime = new Date();
+            updateScanStats();
+            showCheckinSuccess(result.participant_name, result.event_name);
+            // Reload stats and recent checkins
+            loadEventStats(eventId);
+            loadRecentCheckins(eventId);
+        } else {
+            EventHub.showNotification(result.error || 'QR check-in failed.', 'error');
+            updateDebugInfo('QR check-in failed: ' + result.error);
+        }
+        
+    } catch (error) {
+        console.error('QR check-in error:', error);
+        EventHub.showNotification('QR check-in failed. Please try again.', 'error');
+        updateDebugInfo('QR check-in error: ' + error.message);
+    }
+}
+
+function showCheckinSuccess(participantName, eventName) {
+    const successModal = new bootstrap.Modal(document.getElementById('checkinSuccessModal'));
+    document.getElementById('successMessage').textContent = 
+        `Successfully checked in ${participantName} for ${eventName}`;
+    successModal.show();
+    
+    // Add visual feedback
+    updateScannerUI('active');
+    EventHub.showNotification(`Checked in ${participantName} successfully!`, 'success');
+}
+
+function showCameraHelp() {
+    const helpModal = new bootstrap.Modal(document.getElementById('cameraHelpModal'));
+    helpModal.show();
+}
+
+// Search and Data Functions (remain the same)
+async function searchRegistrations(eventId, searchType, searchValue) {
+    try {
+        const response = await fetch(`/api/search-registrations?event_id=${eventId}&search_type=${searchType}&search_value=${encodeURIComponent(searchValue)}`);
+        
+        if (!response.ok) {
+            throw new Error('Search failed');
+        }
+        
+        const results = await response.json();
+        
+        const resultsContainer = document.getElementById('searchResults');
+        resultsContainer.innerHTML = '';
+
+        if (results && results.length > 0) {
+            results.forEach(result => {
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-item retro-card p-3 mb-2';
+                resultItem.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6 class="mb-1 fw-bold">${result.full_name || 'N/A'}</h6>
+                            <small class="text-muted d-block">PRN: ${result.prn || 'N/A'}</small>
+                            <small class="text-muted">${result.class_name || ''} - ${result.branch || ''}</small>
+                        </div>
+                        <div>
+                            <span class="badge retro-badge-${result.is_checked_in ? 'success' : 'warning'}">
+                                ${result.is_checked_in ? 'Checked In' : 'Pending'}
+                            </span>
+                        </div>
+                    </div>
+                `;
+                resultItem.addEventListener('click', function() {
+                    document.getElementById('searchInput').value = searchType === 'prn' ? result.prn : result.full_name;
+                    document.getElementById('searchResults').style.display = 'none';
+                });
+                resultsContainer.appendChild(resultItem);
+            });
+            resultsContainer.style.display = 'block';
+        } else {
+            resultsContainer.innerHTML = '<div class="result-item text-muted text-center p-3">No results found</div>';
+            resultsContainer.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Search error:', error);
+        resultsContainer.innerHTML = '<div class="result-item text-danger text-center p-3">Search failed. Please try again.</div>';
+        resultsContainer.style.display = 'block';
+    }
+}
+
+async function loadEventStats(eventId) {
+    try {
+        const response = await fetch(`/api/event-stats?event_id=${eventId}`);
+        
+        if (!response.ok) {
+            throw new Error('Stats load failed');
+        }
+        
+        const stats = await response.json();
+        
+        document.getElementById('totalRegistrations').textContent = stats.total_registrations || '0';
+        document.getElementById('checkedInCount').textContent = stats.checked_in_count || '0';
+        document.getElementById('pendingCount').textContent = stats.pending_count || '0';
+        
+    } catch (error) {
+        console.error('Stats load error:', error);
+        document.getElementById('totalRegistrations').textContent = '0';
+        document.getElementById('checkedInCount').textContent = '0';
+        document.getElementById('pendingCount').textContent = '0';
+    }
+}
+
+async function loadRecentCheckins(eventId = currentEventId) {
+    if (!eventId) {
+        clearRecentCheckins();
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/recent-checkins?event_id=${eventId}`);
+        
+        if (!response.ok) {
+            throw new Error('Recent checkins load failed');
+        }
+        
+        const checkins = await response.json();
+        const container = document.getElementById('recentCheckins');
+        
+        if (checkins && checkins.length > 0) {
+            container.innerHTML = '';
+            
+            checkins.forEach(checkin => {
+                const item = document.createElement('div');
+                item.className = 'checkin-item';
+                item.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1 fw-bold">${checkin.full_name || 'Unknown'}</h6>
+                            <small class="text-muted">PRN: ${checkin.prn || 'N/A'}</small>
+                            ${checkin.team_name ? `<br><small class="text-muted">Team: ${checkin.team_name}</small>` : ''}
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted">${checkin.checked_in_at || 'Just now'}</small>
+                            <br>
+                            <span class="badge retro-badge-success">Checked In</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        } else {
+            container.innerHTML = `
+                <div class="text-center py-4">
+                    <i class="bi bi-info-circle display-4 text-muted mb-3"></i>
+                    <p class="text-muted">No check-ins yet for this event</p>
+                    <small class="text-muted">Checked-in participants will appear here</small>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Recent checkins load error:', error);
+        const container = document.getElementById('recentCheckins');
+        container.innerHTML = `
+            <div class="text-center py-4">
+                <i class="bi bi-exclamation-triangle display-4 text-muted mb-3"></i>
+                <p class="text-muted">Failed to load recent check-ins</p>
+                <button class="btn btn-outline-dark btn-sm mt-2" onclick="loadRecentCheckins()">
+                    <i class="bi bi-arrow-clockwise me-2"></i>Retry
+                </button>
+            </div>
+        `;
+    }
+}
+
+function clearStats() {
+    document.getElementById('totalRegistrations').textContent = '0';
+    document.getElementById('checkedInCount').textContent = '0';
+    document.getElementById('pendingCount').textContent = '0';
+}
+
+function clearRecentCheckins() {
+    const container = document.getElementById('recentCheckins');
+    container.innerHTML = `
+        <div class="text-center py-4">
+            <i class="bi bi-info-circle display-4 text-muted mb-3"></i>
+            <p class="text-muted">No recent check-ins to display</p>
+            <small class="text-muted">Select an event to see check-ins</small>
+        </div>
+    `;
+}
+
+// Clean up when page is unloaded
+window.addEventListener('beforeunload', function() {
+    scannerActive = false;
+    cameraActive = false;
+    
+    if (scanAnimationFrame) {
+        cancelAnimationFrame(scanAnimationFrame);
+    }
+    
+    if (videoStream) {
+        stopCameraStream();
+    }
+});
+
+// Export functions for global access
+window.loadRecentCheckins = loadRecentCheckins;
+window.initializeScanner = initializeScanner;
+window.toggleScanner = toggleScanner;
+window.showCameraHelp = showCameraHelp;
+window.toggleDebug = toggleDebug;
+window.cancelScannerInitialization = cancelScannerInitialization;
+window.stopScanner = stopScanner;
+</script>
+
+<style>
+/* CSS remains the same as previous version */
+.feature-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--light-grey);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--dark-grey);
+}
+
+.feature-icon.bg-success {
+    background: var(--success-color);
+    border-color: var(--success-color);
+}
+
+.feature-icon.bg-danger {
+    background: var(--error-color);
+    border-color: var(--error-color);
+}
+
+.feature-icon.bg-primary {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.scanner-container {
+    position: relative;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.scanner-wrapper {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--dark-grey);
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#cameraPreview {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.camera-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, #333, #555);
+    color: white;
+    text-align: center;
+}
+
+#qrVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #000;
+    display: block;
+    transform: scaleX(-1); /* Mirror the video for more natural feel */
+}
+
+.scanner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.scanner-frame {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70%;
+    height: 70%;
+    border: 3px solid var(--success-color);
+    border-radius: 12px;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
+    animation: pulse 2s infinite;
+}
+
+.scanner-laser {
+    position: absolute;
+    top: 15%;
+    left: 15%;
+    width: 70%;
+    height: 2px;
+    background: var(--success-color);
+    animation: scan 2s infinite;
+    box-shadow: 0 0 10px var(--success-color);
+    border-radius: 1px;
+}
+
+/* Scanner States */
+.scanner-initial,
+.scanner-loading,
+.scanner-error {
+    padding: 2rem 1rem;
+    text-align: center;
+}
+
+.scanner-stats {
+    padding: 1rem 0;
+}
+
+.scanner-tips {
+    border-left: 4px solid var(--info-color);
+    margin-top: 1rem;
+}
+
+.scanner-tips h6 {
+    color: var(--dark-grey);
+}
+
+.camera-troubleshoot {
+    border-left: 4px solid var(--warning-color);
+}
+
+/* Stats Items */
+.stats-item {
+    padding: 0.5rem;
+}
+
+.stats-item h5 {
+    font-size: 1.25rem;
+}
+
+/* Search Results */
+.search-results {
+    max-height: 200px;
+    overflow-y: auto;
+    border-radius: 8px;
+    background: var(--light-grey);
+    border: 1px solid var(--light-grey);
+}
+
+.result-item {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid var(--light-grey);
+    background: white;
+}
+
+.result-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-color: var(--primary-color);
+}
+
+/* Check-in Items */
+.checkin-item {
+    border-left: 4px solid var(--success-color);
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    background: var(--light-grey);
+    border-radius: 8px;
+    transition: transform 0.2s ease;
+    border: 1px solid #e9ecef;
+}
+
+.checkin-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Stats Cards */
+.stats-card {
+    transition: transform 0.2s ease;
+    border: 1px solid var(--light-grey);
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Spinner */
+.retro-spinner {
+    border-color: var(--dark-grey);
+    border-right-color: transparent;
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Debug Info */
+.debug-info {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-family: monospace;
+    font-size: 0.8rem;
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% { 
+        border-color: var(--success-color);
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
+    }
+    50% { 
+        border-color: #4ade80;
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.3);
+    }
+}
+
+@keyframes scan {
+    0% { 
+        top: 15%;
+        opacity: 1;
+    }
+    50% { 
+        top: 85%;
+        opacity: 0.7;
+    }
+    100% { 
+        top: 15%;
+        opacity: 1;
+    }
+}
+
+/* Badge variants */
+.retro-badge-success {
+    background: var(--success-color);
+    color: white;
+    border: none;
+}
+
+.retro-badge-warning {
+    background: var(--warning-color);
+    color: white;
+    border: none;
+}
+
+.retro-badge-error {
+    background: var(--error-color);
+    color: white;
+    border: none;
+}
+
+.retro-badge-info {
+    background: var(--info-color);
+    color: white;
+    border: none;
+}
+
+/* Scanner State Specific Styles */
+.scanner-loading .retro-text {
+    color: var(--dark-grey);
+}
+
+.scanner-error .retro-heading {
+    color: var(--error-color);
+}
+
+.scanner-initial .retro-heading {
+    color: var(--primary-color);
+}
+
+/* Button Enhancements */
+.btn-scanner-control {
+    transition: all 0.3s ease;
+}
+
+.btn-scanner-control:hover {
+    transform: translateY(-1px);
+}
+
+/* Form Enhancements */
+.form-check.retro-card {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.form-check.retro-card:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-1px);
+}
+
+.form-check-input:checked ~ .form-check-label {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .scanner-wrapper {
+        min-height: 250px;
+    }
+    
+    #cameraPreview {
+        height: 250px;
+    }
+    
+    .scanner-frame {
+        width: 80%;
+        height: 60%;
+    }
+    
+    .scanner-laser {
+        width: 80%;
+        left: 10%;
+    }
+    
+    .scanner-initial,
+    .scanner-loading,
+    .scanner-error {
+        padding: 1.5rem 0.5rem;
+    }
+    
+    .scanner-stats .row {
+        margin: 0 -5px;
+    }
+    
+    .stats-item {
+        padding: 0.25rem;
+    }
+    
+    .stats-item h5 {
+        font-size: 1.1rem;
+    }
+    
+    .scanner-tips {
+        margin-top: 0.5rem;
+        padding: 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .scanner-wrapper {
+        min-height: 200px;
+    }
+    
+    #cameraPreview {
+        height: 200px;
+    }
+    
+    .scanner-frame {
+        width: 85%;
+        height: 50%;
+    }
+    
+    .scanner-laser {
+        width: 85%;
+        left: 7.5%;
+    }
+    
+    .feature-icon {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .feature-icon i {
+        font-size: 1rem;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .scanner-wrapper {
+        background: #2d3748;
+    }
+    
+    #cameraPreview {
+        background: #2d3748;
+    }
+    
+    .scanner-frame {
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
+    }
+    
+    .result-item {
+        background: #4a5568;
+        border-color: #4a5568;
+        color: white;
+    }
+    
+    .checkin-item {
+        background: #4a5568;
+        border-color: #4a5568;
+        color: white;
+    }
+}
+
+/* Print styles */
+@media print {
+    .scanner-container,
+    .scanner-loading,
+    .scanner-error,
+    .scanner-initial,
+    .scanner-stats {
+        display: none !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .scanner-frame {
+        border-width: 4px;
+    }
+    
+    .scanner-laser {
+        height: 3px;
+    }
+    
+    .feature-icon {
+        border-width: 3px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .scanner-frame,
+    .scanner-laser {
+        animation: none;
+    }
+    
+    .result-item:hover,
+    .checkin-item:hover,
+    .stats-card:hover {
+        transform: none;
+    }
+}
+</style>
+{% endblock %}

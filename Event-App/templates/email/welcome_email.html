@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #4361ee, #3a0ca3); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+        .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+        .btn { display: inline-block; padding: 12px 24px; background: #4361ee; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to EventHub!</h1>
+            <p>Your Event Management Platform</p>
+        </div>
+        <div class="content">
+            <h2>Hello {{ user.full_name }},</h2>
+            <p>Welcome to EventHub! Your account has been successfully created.</p>
+            
+            <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3>Your Account Details:</h3>
+                <p><strong>Username:</strong> {{ user.username }}</p>
+                <p><strong>Role:</strong> {{ user.role }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                {% if user.organization %}
+                <p><strong>Organization:</strong> {{ user.organization }}</p>
+                {% endif %}
+            </div>
+
+            <p>With your EventHub account, you can:</p>
+            <ul>
+                {% if user.role in ['Host', 'Organizer', 'Admin'] %}
+                <li>Create and manage events</li>
+                <li>Track registrations and check-ins</li>
+                <li>Generate event analytics</li>
+                {% else %}
+                <li>Discover and register for events</li>
+                <li>Manage your event registrations</li>
+                <li>Receive digital tickets with QR codes</li>
+                {% endif %}
+            </ul>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{ url_for('index', _external=True) }}" class="btn">Get Started</a>
+            </div>
+
+            <p>If you have any questions, feel free to contact our support team.</p>
+        </div>
+        <div class="footer">
+            <p>&copy; 2025 EventHub. All rights reserved.</p>
+            <p>This is an automated message, please do not reply to this email.</p>
+        </div>
+    </div>
+</body>
+</html>

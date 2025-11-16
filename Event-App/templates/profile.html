@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-4 mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card retro-card mt-5" data-aos="fade-up" data-aos-duration="600">
+                <div class="card-header border-bottom py-3">
+                    <h3 class="card-title mb-0 fw-bold retro-heading">My <span class="retro-accent">Profile</span></h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="profile-info">
+                                <h6 class="fw-bold mb-3 text-muted">Personal Information</h6>
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium text-muted small">Full Name</label>
+                                    <p class="fw-bold">{{ user.full_name }}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium text-muted small">Username</label>
+                                    <p class="fw-bold">{{ user.username }}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium text-muted small">Email Address</label>
+                                    <p class="fw-bold">{{ user.email }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="profile-info">
+                                <h6 class="fw-bold mb-3 text-muted">Account Details</h6>
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium text-muted small">Role</label>
+                                    <p class="fw-bold">
+                                        <span class="badge retro-badge">{{ user.role }}</span>
+                                    </p>
+                                </div>
+                                {% if user.organization %}
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium text-muted small">Organization</label>
+                                    <p class="fw-bold">{{ user.organization }}</p>
+                                </div>
+                                {% endif %}
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium text-muted small">Member Since</label>
+                                    <p class="fw-bold">{{ user.created_at.strftime('%B %d, %Y') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Info Section -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="border-top pt-4">
+                                <h6 class="fw-bold mb-3 text-muted">Account Statistics</h6>
+                                <div class="row text-center">
+                                    <div class="col-md-4 mb-3">
+                                        <div class="border rounded p-3">
+                                            <i class="bi bi-calendar-event display-6 text-muted mb-2"></i>
+                                            <h5 class="fw-bold mb-1">0</h5>
+                                            <small class="text-muted">Events Attended</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="border rounded p-3">
+                                            <i class="bi bi-ticket-perforated display-6 text-muted mb-2"></i>
+                                            <h5 class="fw-bold mb-1">0</h5>
+                                            <small class="text-muted">Active Registrations</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="border rounded p-3">
+                                            <i class="bi bi-star display-6 text-muted mb-2"></i>
+                                            <h5 class="fw-bold mb-1">Member</h5>
+                                            <small class="text-muted">Account Tier</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize AOS animations
+    AOS.init({
+        duration: 800,
+        once: true,
+        offset: 100
+    });
+});
+</script>
+
+<style>
+.profile-info label {
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.profile-info p {
+    margin-bottom: 0;
+    font-size: 1rem;
+}
+
+.border.rounded {
+    border: 1px solid var(--light-grey) !important;
+    transition: all 0.3s ease;
+}
+
+.border.rounded:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.card-header.border-bottom {
+    border-bottom: 2px solid var(--pure-black) !important;
+}
+
+.border-top {
+    border-top: 1px solid var(--light-grey) !important;
+}
+</style>
+{% endblock %}

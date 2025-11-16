@@ -1,0 +1,10 @@
+Flask
+Flask-PyMongo
+bcrypt
+qrcode
+Pillow
+python-dotenv
+flask-mail
+opencv-python
+numpy
+pyzbar

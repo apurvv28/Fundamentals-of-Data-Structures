@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-4 mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-5" data-aos="fade-up" data-aos-duration="600">
+        <div>
+            <h1 class="display-5 fw-bold mb-2 retro-heading">Admin <span class="retro-accent">Dashboard</span></h1>
+            <p class="lead retro-text">Welcome back, {{ session.full_name }}! Here's your event overview.</p>
+        </div>
+        <a href="{{ url_for('create_event') }}" class="btn btn-dark retro-btn">
+            <i class="bi bi-plus-circle me-2"></i>Create Event
+        </a>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-5" data-aos="fade-up" data-aos-duration="600" data-aos-delay="100">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card retro-card stat-card">
+                <div class="card-body p-4 text-center">
+                    <div class="stat-icon retro-stat-icon mx-auto mb-3">
+                        <i class="bi bi-calendar-check fs-1"></i>
+                    </div>
+                    <h3 class="fw-bold mb-2 retro-number">{{ stats.total_events }}</h3>
+                    <p class="text-muted mb-0 fw-medium">Total Events</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card retro-card stat-card">
+                <div class="card-body p-4 text-center">
+                    <div class="stat-icon retro-stat-icon mx-auto mb-3">
+                        <i class="bi bi-people fs-1"></i>
+                    </div>
+                    <h3 class="fw-bold mb-2 retro-number">{{ stats.total_participants }}</h3>
+                    <p class="text-muted mb-0 fw-medium">Total Participants</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card retro-card stat-card">
+                <div class="card-body p-4 text-center">
+                    <div class="stat-icon retro-stat-icon mx-auto mb-3">
+                        <i class="bi bi-check-circle fs-1"></i>
+                    </div>
+                    <h3 class="fw-bold mb-2 retro-number">{{ stats.total_checked_in }}</h3>
+                    <p class="text-muted mb-0 fw-medium">Checked In</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card retro-card stat-card">
+                <div class="card-body p-4 text-center">
+                    <div class="stat-icon retro-stat-icon mx-auto mb-3">
+                        <i class="bi bi-graph-up fs-1"></i>
+                    </div>
+                    <h3 class="fw-bold mb-2 retro-number">{{ stats.attendance_rate }}%</h3>
+                    <p class="text-muted mb-0 fw-medium">Attendance Rate</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- My Events -->
+        <div class="col-lg-8 mb-4">
+            <div class="card retro-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="200">
+                <div class="card-header border-bottom py-3">
+                    <h5 class="card-title mb-0 fw-bold retro-heading">My <span class="retro-accent">Events</span></h5>
+                </div>
+                <div class="card-body p-4">
+                    {% if events %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="fw-medium">Event Title</th>
+                                    <th class="fw-medium">Date</th>
+                                    <th class="fw-medium">Venue</th>
+                                    <th class="fw-medium">Capacity</th>
+                                    <th class="fw-medium">Status</th>
+                                    <th class="fw-medium">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for event in events %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ event.title }}</strong>
+                                        <br><small class="text-muted">{{ event.organization }}</small>
+                                    </td>
+                                    <td>{{ event.date }}<br><small class="text-muted">{{ event.time }}</small></td>
+                                    <td>{{ event.venue }}</td>
+                                    <td>
+                                        <span class="fw-bold">{{ event.registered_participants|length }}/{{ event.capacity }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge text-white bg-info retro-badge-{{ 'success' if event.registered_participants|length < event.capacity else 'warning' }}">
+                                            {{ 'Available' if event.registered_participants|length < event.capacity else 'Almost Full' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-dark retro-btn-outline" data-bs-toggle="tooltip" title="View Details">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+                                            <button class="btn btn-outline-dark retro-btn-outline" data-bs-toggle="tooltip" title="Check-in">
+                                                <i class="bi bi-qr-code-scan"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-calendar-x display-1 text-muted"></i>
+                        <h5 class="text-muted mt-3 retro-heading">No Events Created</h5>
+                        <p class="retro-text">Get started by creating your first event!</p>
+                        <a href="{{ url_for('create_event') }}" class="btn btn-dark retro-btn">Create Event</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card retro-card mb-4" data-aos="fade-up" data-aos-duration="600" data-aos-delay="300">
+                <div class="card-header border-bottom py-3">
+                    <h5 class="card-title mb-0 fw-bold retro-heading">Quick <span class="retro-accent">Actions</span></h5>
+                </div>
+                <div class="card-body p-3">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('create_event') }}" class="btn btn-outline-dark retro-btn-outline text-start">
+                            <i class="bi bi-plus-circle me-2"></i>Create New Event
+                        </a>
+                        <a href="{{ url_for('checkin') }}" class="btn btn-outline-dark retro-btn-outline text-start">
+                            <i class="bi bi-qr-code-scan me-2"></i>Check-in Participants
+                        </a>
+                        <a href="{{ url_for('view_registrations') }}" class="btn btn-outline-dark retro-btn-outline text-start">
+                            <i class="bi bi-list-check me-2"></i>View Registrations
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Registrations -->
+            <div class="card retro-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="400">
+                <div class="card-header border-bottom py-3">
+                    <h5 class="card-title mb-0 fw-bold retro-heading">Recent <span class="retro-accent">Registrations</span></h5>
+                </div>
+                <div class="card-body p-3">
+                    {% if recent_registrations %}
+                    <div class="list-group list-group-flush">
+                        {% for reg in recent_registrations %}
+                        <div class="list-group-item px-0 border-0 mb-2">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1 fw-bold">{{ reg.full_name }}</h6>
+                                    <small class="text-muted">{{ reg.event_name }}</small>
+                                </div>
+                                <span class="text-white bg-success badge retro-badge-{{ 'success' if reg.is_checked_in else 'secondary' }}">
+                                    {{ 'Checked In' if reg.is_checked_in else 'Registered' }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="bi bi-person-plus display-1 text-muted"></i>
+                        <p class="retro-text mt-2">No recent registrations</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize AOS animations
+    AOS.init({
+        duration: 800,
+        once: true,
+        offset: 100
+    });
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+
+    // Add hover effects to cards
+    const cards = document.querySelectorAll('.retro-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.transition = 'transform 0.3s ease';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+
+    // Add counting animation to stats
+    const statNumbers = document.querySelectorAll('.retro-number');
+    if (statNumbers.length > 0) {
+        statNumbers.forEach(stat => {
+            const text = stat.textContent;
+            if (text.includes('%')) {
+                const target = parseInt(text);
+                if (!isNaN(target)) {
+                    let current = 0;
+                    const increment = target / 50;
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= target) {
+                            stat.textContent = text;
+                            clearInterval(timer);
+                        } else {
+                            stat.textContent = Math.floor(current) + '%';
+                        }
+                    }, 30);
+                }
+            } else {
+                const target = parseInt(text);
+                if (!isNaN(target)) {
+                    let current = 0;
+                    const increment = target / 50;
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= target) {
+                            stat.textContent = target;
+                            clearInterval(timer);
+                        } else {
+                            stat.textContent = Math.floor(current);
+                        }
+                    }, 30);
+                }
+            }
+        });
+    }
+});
+</script>
+
+<style>
+.stat-card {
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.table th {
+    border-bottom: 2px solid var(--pure-black);
+    background: var(--light-grey);
+}
+
+.table td {
+    border-bottom: 1px solid var(--light-grey);
+    vertical-align: middle;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+.badge.retro-badge-secondary {
+    background: var(--medium-grey);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .display-5 {
+        font-size: 2rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+}
+</style>
+{% endblock %}

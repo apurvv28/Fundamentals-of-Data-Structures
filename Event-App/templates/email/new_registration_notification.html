@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #4361ee, #3a0ca3); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+        .content { background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }
+        .registration-info { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #4361ee; }
+        .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+        .stats { background: #e7f3ff; padding: 15px; border-radius: 5px; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>New Event Registration! 📝</h1>
+            <p>{{ event.title }}</p>
+        </div>
+        <div class="content">
+            <h2>Hello Event Organizer,</h2>
+            <p>You have a new registration for your event <strong>"{{ event.title }}"</strong>.</p>
+            
+            <div class="registration-info">
+                <h3>Participant Details:</h3>
+                <p><strong>Name:</strong> {{ registration.full_name }}</p>
+                <p><strong>Email:</strong> {{ registration.email }}</p>
+                <p><strong>Phone:</strong> {{ registration.phone }}</p>
+                <p><strong>PRN:</strong> {{ registration.prn }}</p>
+                <p><strong>Class:</strong> {{ registration.class_name }}</p>
+                <p><strong>Branch:</strong> {{ registration.branch }}</p>
+                <p><strong>Address:</strong> {{ registration.address }}</p>
+                <p><strong>Number of Participants:</strong> {{ registration.num_participants }}</p>
+                <p><strong>Registration Date:</strong> {{ registration.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+            </div>
+
+            <div class="stats">
+                <h4>📊 Current Registration Stats:</h4>
+                <p><strong>Total Registrations:</strong> {{ event.registered_participants|length }}</p>
+                <p><strong>Event Capacity:</strong> {{ event.capacity }}</p>
+                <p><strong>Available Spots:</strong> {{ event.capacity - event.registered_participants|length }}</p>
+                <p><strong>Registration Rate:</strong> {{ ((event.registered_participants|length / event.capacity) * 100)|round|int }}%</p>
+            </div>
+
+            <h3>Event Information:</h3>
+            <p><strong>Event:</strong> {{ event.title }}</p>
+            <p><strong>Date:</strong> {{ event.date }} at {{ event.time }}</p>
+            <p><strong>Venue:</strong> {{ event.venue }}</p>
+            
+            <p>You can manage all registrations and check-ins through your EventHub admin dashboard.</p>
+            
+            <div style="text-align: center; margin: 20px 0;">
+                <a href="{{ url_for('admin_dashboard', _external=True) }}" style="display: inline-block; padding: 12px 24px; background: #4361ee; color: white; text-decoration: none; border-radius: 5px;">View Dashboard</a>
+            </div>
+        </div>
+        <div class="footer">
+            <p>&copy; 2025 EventHub. All rights reserved.</p>
+            <p>This is an automated notification from EventHub.</p>
+        </div>
+    </div>
+</body>
+</html>

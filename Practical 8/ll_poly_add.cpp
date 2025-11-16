@@ -1,5 +1,3 @@
-//Use a singly linked list to represent and perform addition of polynomials, enabling dynamic storage and easy insertion of terms. 
-
 #include <iostream>
 using namespace std;
 

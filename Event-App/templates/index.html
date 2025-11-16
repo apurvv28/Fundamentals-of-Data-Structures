@@ -1,0 +1,467 @@
+{% extends "base.html" %}
+
+{% block title %}Home - EventHub | Professional Event Management{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section retro-hero pt-5 mt-5">
+    <div class="container pt-5">
+        <div class="row align-items-center min-vh-75 py-5">
+            <div class="col-lg-6" data-aos="fade-right" data-aos-duration="800">
+                <div class="hero-content">
+                    <h1 class="display-4 fw-bold mb-4 retro-heading">
+                        Elevate Your 
+                        <span class="retro-accent">Event Experience</span>
+                    </h1>
+                    <p class="lead mb-4 fs-5 retro-text">
+                        Transform event management with our all-in-one platform. From seamless registration to instant QR check-ins, we make every event unforgettable.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3 mb-4">
+                        <a href="{{ url_for('events') }}" class="btn btn-dark btn-lg px-4 py-3 retro-btn">
+                            <i class="bi bi-calendar-event me-2"></i>Explore Events
+                        </a>
+                        {% if not session.username %}
+                        <a href="{{ url_for('register') }}" class="btn btn-outline-dark btn-lg px-4 py-3 retro-btn-outline">
+                            <i class="bi bi-rocket me-2"></i>Get Started Free
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex flex-wrap gap-4 retro-meta">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <small class="fw-medium">No Credit Card Required</small>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <small class="fw-medium">Free Forever Plan</small>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            <small class="fw-medium">24/7 Support</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6" data-aos="fade-left" data-aos-duration="800" data-aos-delay="200">
+                <div class="terminal-container retro-terminal">
+                    <div class="terminal-header">
+                        <div class="terminal-buttons">
+                            <span class="terminal-btn close"></span>
+                            <span class="terminal-btn minimize"></span>
+                            <span class="terminal-btn maximize"></span>
+                        </div>
+                        <div class="terminal-title">bash — EventHub Registration</div>
+                    </div>
+                    <div class="terminal-body">
+                        <div class="terminal-line">
+                            <span class="prompt">$</span>
+                            <span class="command">npm install EventHub-CLI</span>
+                        </div>
+                        <div class="terminal-output">
+                            <span class="output-text">📦 Installing EventHub CLI...</span>
+                        </div>
+                        <div class="terminal-output">
+                            <span class="output-text">✅ Package installed successfully!</span>
+                        </div>
+                        
+                        <div class="terminal-line">
+                            <span class="prompt">$</span>
+                            <span class="command">eventhub create-event "Your-Event"</span>
+                        </div>
+                        <div class="terminal-output">
+                            <span class="output-text">🎯 Creating event: Your-Event 2026</span>
+                        </div>
+                        <div class="terminal-output">
+                            <span class="output-text">✅ Event created successfully!</span>
+                        </div>
+                        
+                        <div class="terminal-line">
+                            <span class="prompt">$</span>
+                            <span class="command">eventhub configure --date "2026-03-15" --venue "EventHub Centre"</span>
+                        </div>
+                        <div class="terminal-output">
+                            <span class="output-text">📅 Date set: March 15, 2026</span>
+                        </div>
+                        <div class="terminal-output">
+                            <span class="output-text">📍 Venue set: EventHub Centre</span>
+                        </div>
+                        
+                        <div class="terminal-line">
+                            <span class="prompt">$</span>
+                            <span class="command">eventhub start-registration</span>
+                        </div>
+                        <div class="terminal-output">
+                            <span class="output-text">🚀 Starting registration server...</span>
+                        </div>
+                        <div class="terminal-output">
+                            <span class="output-text">🌐 Server running on localhost:3000</span>
+                        </div>
+                        <div class="terminal-output">
+                            <span class="output-text success">💫 Ready to accept registrations!</span>
+                        </div>
+                        <div class="terminal-output">
+                            <span class="output-text highlight">🎉 Welcome to the future of event management!</span>
+                        </div>
+                        
+                        <div class="terminal-line active">
+                            <span class="prompt blink">$</span>
+                            <span class="command typed-text"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5 retro-stats">
+    <div class="container">
+        <div class="row text-center" data-aos="fade-up" data-aos-duration="600">
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-card text-center p-4 retro-card">
+                    <div class="stat-icon retro-stat-icon mx-auto mb-3">
+                        <i class="bi bi-calendar-check fs-1"></i>
+                    </div>
+                    <h3 class="fw-bold mb-2 retro-number">{{ stats.total_events }}+</h3>
+                    <p class="text-muted mb-0 fw-medium">Successful Events</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-card text-center p-4 retro-card">
+                    <div class="stat-icon retro-stat-icon mx-auto mb-3">
+                        <i class="bi bi-people fs-1"></i>
+                    </div>
+                    <h3 class="fw-bold mb-2 retro-number">{{ stats.total_participants }}+</h3>
+                    <p class="text-muted mb-0 fw-medium">Happy Participants</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-card text-center p-4 retro-card">
+                    <div class="stat-icon retro-stat-icon mx-auto mb-3">
+                        <i class="bi bi-check-circle fs-1"></i>
+                    </div>
+                    <h3 class="fw-bold mb-2 retro-number">{{ stats.total_checked_in }}+</h3>
+                    <p class="text-muted mb-0 fw-medium">Seamless Check-ins</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6 mb-4">
+                <div class="stat-card text-center p-4 retro-card">
+                    <div class="stat-icon retro-stat-icon mx-auto mb-3">
+                        <i class="bi bi-graph-up fs-1"></i>
+                    </div>
+                    <h3 class="fw-bold mb-2 retro-number">{{ stats.attendance_rate }}%</h3>
+                    <p class="text-muted mb-0 fw-medium">Average Attendance</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Events -->
+<section class="py-5 retro-events">
+    <div class="container">
+        <div class="row mb-5" data-aos="fade-up" data-aos-duration="600">
+            <div class="col-12 text-center">
+                <h2 class="display-5 fw-bold mb-3 retro-heading">Featured <span class="retro-accent">Events</span></h2>
+                <p class="lead retro-text">Discover handpicked events that promise unforgettable experiences</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            {% for event in events %}
+            <div class="col-xl-4 col-lg-6" data-aos="fade-up" data-aos-duration="600" data-aos-delay="{{ loop.index * 100 }}">
+                <div class="card event-card h-100 retro-card">
+                    <div class="position-relative overflow-hidden">
+                        <img src="{{ event.image_url or '/static/images/event-default.jpg' }}" 
+                             class="card-img-top event-card-img retro-image" 
+                             alt="{{ event.title }}"
+                             onerror="this.src='/static/images/event-default.jpg'">
+                        <div class="position-absolute top-0 end-0 m-3">
+                            <span class="badge retro-badge">
+                                {{ 'Team Event' if event.is_team_event else 'Individual' }}
+                            </span>
+                        </div>
+                        <div class="position-absolute top-0 start-0 m-3">
+                            <span class="badge retro-badge-dark">₹{{ event.fee }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body d-flex flex-column p-4">
+                        <div class="mb-3">
+                            <span class="badge retro-badge-light mb-2">{{ event.organization }}</span>
+                            <h5 class="card-title fw-bold mb-2">{{ event.title }}</h5>
+                            <p class="card-text text-muted">{{ event.description[:120] }}{% if event.description|length > 120 %}...{% endif %}</p>
+                        </div>
+                        
+                        <div class="event-meta mb-4">
+                            <div class="d-flex align-items-center text-muted mb-2">
+                                <i class="bi bi-calendar-event me-2"></i>
+                                <small class="fw-medium">{{ event.date }} at {{ event.time }}</small>
+                            </div>
+                            <div class="d-flex align-items-center text-muted mb-2">
+                                <i class="bi bi-geo-alt me-2"></i>
+                                <small class="fw-medium">{{ event.venue }}</small>
+                            </div>
+                            {% if event.prize_pool and event.prize_pool != '0' %}
+                            <div class="d-flex align-items-center text-muted">
+                                <i class="bi bi-trophy me-2"></i>
+                                <small class="fw-medium">Prize: {{ event.prize_pool }}</small>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <small class="text-muted fw-medium">Capacity</small>
+                                    <div class="progress mt-1 retro-progress" style="height: 6px; width: 100px;">
+                                        <div class="progress-bar retro-progress-bar" 
+                                             style="width: {{ (event.registered_participants|length / event.capacity) * 100 }}%">
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="text-muted small fw-medium">
+                                    {{ event.registered_participants|length }}/{{ event.capacity }}
+                                </span>
+                            </div>
+                            <a href="{{ url_for('events') }}" class="btn btn-dark w-100 retro-btn">
+                                <i class="bi bi-eye me-2"></i>View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-5" data-aos="fade-up" data-aos-duration="600">
+            <a href="{{ url_for('events') }}" class="btn btn-outline-dark btn-lg px-5 retro-btn-outline">
+                <i class="bi bi-arrow-right me-2"></i>Explore All Events
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5 retro-features">
+    <div class="container">
+        <div class="row mb-5" data-aos="fade-up" data-aos-duration="600">
+            <div class="col-12 text-center">
+                <h2 class="display-5 fw-bold mb-3 retro-heading">Why Choose <span class="retro-accent">EventHub?</span></h2>
+                <p class="lead retro-text">Designed for modern event organizers and participants</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-duration="600" data-aos-delay="100">
+                <div class="feature-card text-center p-4 h-100 retro-card">
+                    <div class="feature-icon retro-feature-icon mx-auto mb-4">
+                        <i class="bi bi-qr-code-scan fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Instant QR Check-in</h4>
+                    <p class="text-muted mb-0">Streamline event entry with lightning-fast QR code scanning. Reduce queues and enhance participant experience.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-duration="600" data-aos-delay="200">
+                <div class="feature-card text-center p-4 h-100 retro-card">
+                    <div class="feature-icon retro-feature-icon mx-auto mb-4">
+                        <i class="bi bi-graph-up-arrow fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Live Analytics Dashboard</h4>
+                    <p class="text-muted mb-0">Real-time insights into attendance, engagement, and event performance with beautiful visualizations.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-duration="600" data-aos-delay="300">
+                <div class="feature-card text-center p-4 h-100 retro-card">
+                    <div class="feature-icon retro-feature-icon mx-auto mb-4">
+                        <i class="bi bi-shield-check fs-1"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Enterprise Security</h4>
+                    <p class="text-muted mb-0">Bank-level encryption and secure payment processing to protect your data and transactions.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 retro-cta">
+    <div class="container">
+        <div class="row align-items-center text-center text-lg-start">
+            <div class="col-lg-8" data-aos="fade-right" data-aos-duration="600">
+                <h2 class="display-5 fw-bold mb-3 text-white">Ready to Transform Your Events?</h2>
+                <p class="lead mb-4">Join thousands of organizers who trust EventHub for their event management needs.</p>
+                <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start">
+                    {% if not session.username %}
+                    <a href="{{ url_for('register') }}" class="btn btn-light btn-lg px-4 py-3 retro-btn-light">
+                        <i class="bi bi-rocket me-2"></i>Start Free Trial
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('events') }}" class="btn btn-outline-light btn-lg px-4 py-3 retro-btn-outline-light">
+                        <i class="bi bi-calendar-event me-2"></i>Browse Events
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 mt-4 mt-lg-0" data-aos="fade-left" data-aos-duration="600" data-aos-delay="200">
+                <div class="text-center">
+                    <div class="cta-icon retro-cta-icon rounded-3 p-4 d-inline-block">
+                        <i class="bi bi-arrow-up-right-circle display-4"></i>
+                    </div>
+                    <h5 class="fw-bold mt-3 text-white">Get Started in Minutes</h5>
+                    <p class="mb-0">No setup fees, no contracts</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Additional animations for the home page
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add hover effects to cards
+        const cards = document.querySelectorAll('.retro-card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.transition = 'transform 0.3s ease';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Add counting animation to stats
+        const statNumbers = document.querySelectorAll('.retro-number');
+        if (statNumbers.length > 0) {
+            statNumbers.forEach(stat => {
+                const text = stat.textContent;
+                if (text.includes('+') || text.includes('%')) {
+                    const target = parseInt(text);
+                    if (!isNaN(target)) {
+                        let current = 0;
+                        const increment = target / 50;
+                        const timer = setInterval(() => {
+                            current += increment;
+                            if (current >= target) {
+                                stat.textContent = text;
+                                clearInterval(timer);
+                            } else {
+                                if (text.includes('%')) {
+                                    stat.textContent = Math.floor(current) + '%';
+                                } else {
+                                    stat.textContent = Math.floor(current) + '+';
+                                }
+                            }
+                        }, 30);
+                    }
+                }
+            });
+        }
+
+        // Terminal typing animation
+        const terminalLines = document.querySelectorAll('.terminal-line:not(.active)');
+        let currentLine = 0;
+        
+        function typeTerminalLine() {
+            if (currentLine < terminalLines.length) {
+                const line = terminalLines[currentLine];
+                const command = line.querySelector('.command');
+                const text = command.textContent;
+                let index = 0;
+                
+                command.textContent = '';
+                line.style.display = 'block';
+                
+                const typeChar = () => {
+                    if (index < text.length) {
+                        command.textContent += text.charAt(index);
+                        index++;
+                        setTimeout(typeChar, 50);
+                    } else {
+                        // Show output after command is typed
+                        const outputs = line.nextElementSibling;
+                        if (outputs && outputs.classList.contains('terminal-output')) {
+                            let outputIndex = 0;
+                            const outputLines = outputs.querySelectorAll('.output-text');
+                            
+                            const showOutput = () => {
+                                if (outputIndex < outputLines.length) {
+                                    outputLines[outputIndex].style.opacity = '1';
+                                    outputLines[outputIndex].style.transform = 'translateY(0)';
+                                    outputIndex++;
+                                    setTimeout(showOutput, 300);
+                                } else {
+                                    currentLine++;
+                                    setTimeout(typeTerminalLine, 500);
+                                }
+                            };
+                            
+                            showOutput();
+                        } else {
+                            currentLine++;
+                            setTimeout(typeTerminalLine, 500);
+                        }
+                    }
+                };
+                
+                typeChar();
+            } else {
+                // Start blinking cursor animation
+                const activeLine = document.querySelector('.terminal-line.active');
+                const typedText = activeLine.querySelector('.typed-text');
+                const commands = [
+                    "eventhub register --event TechFiesta-2026",
+                    "eventhub generate-qr --event TechFiesta-2026",
+                    "eventhub analytics --live"
+                ];
+                let commandIndex = 0;
+                let charIndex = 0;
+                let isDeleting = false;
+                
+                function typeActiveLine() {
+                    const currentCommand = commands[commandIndex];
+                    
+                    if (isDeleting) {
+                        typedText.textContent = currentCommand.substring(0, charIndex - 1);
+                        charIndex--;
+                    } else {
+                        typedText.textContent = currentCommand.substring(0, charIndex + 1);
+                        charIndex++;
+                    }
+                    
+                    if (!isDeleting && charIndex === currentCommand.length) {
+                        isDeleting = true;
+                        setTimeout(typeActiveLine, 2000);
+                    } else if (isDeleting && charIndex === 0) {
+                        isDeleting = false;
+                        commandIndex = (commandIndex + 1) % commands.length;
+                        setTimeout(typeActiveLine, 500);
+                    } else {
+                        setTimeout(typeActiveLine, isDeleting ? 50 : 100);
+                    }
+                }
+                
+                typeActiveLine();
+            }
+        }
+        
+        // Start terminal animation after a short delay
+        setTimeout(typeTerminalLine, 1000);
+        
+        // Initialize all terminal outputs as hidden
+        document.querySelectorAll('.terminal-output .output-text').forEach(output => {
+            output.style.opacity = '0';
+            output.style.transform = 'translateY(10px)';
+            output.style.transition = 'all 0.3s ease';
+        });
+        
+        // Hide all terminal lines except active one initially
+        document.querySelectorAll('.terminal-line:not(.active)').forEach(line => {
+            line.style.display = 'none';
+        });
+    });
+</script>
+{% endblock %}

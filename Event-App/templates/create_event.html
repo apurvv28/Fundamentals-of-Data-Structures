@@ -1,0 +1,783 @@
+{% extends "base.html" %}
+
+{% block title %}Create Event - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-5 mt-4">
+    <!-- Header Section -->
+    <div class="row mb-5" data-aos="fade-up" data-aos-duration="600">
+        <div class="col-12 text-center">
+            <h1 class="display-5 fw-bold mb-1 retro-heading mt-3">Create <span class="retro-accent">New Event</span></h1>
+            <p class="lead retro-text">Fill in the details below to create your amazing event</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-xl-10 col-lg-12">
+            <div class="card retro-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="100">
+                <div class="card-header border-bottom py-4">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h2 class="h3 mb-0 fw-bold retro-heading">
+                                <i class="bi bi-plus-circle me-2"></i>Event Details
+                            </h2>
+                            <p class="mb-0 retro-text mt-2">Host: <span class="fw-bold">{{ session.organization }}</span></p>
+                        </div>
+                        <div class="col-auto">
+                            <span class="badge retro-badge">Host Dashboard</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4 p-md-5">
+                    <form method="POST" id="eventForm">
+                        <!-- Basic Information Section -->
+                        <div class="row mb-5">
+                            <div class="col-12">
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="feature-icon me-3">
+                                        <i class="bi bi-info-circle fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="fw-bold retro-heading mb-1">Basic Information</h4>
+                                        <p class="retro-text mb-0">Tell us about your event</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-medium">Event Title *</label>
+                                        <input type="text" class="form-control retro-input" name="title" required 
+                                               placeholder="Enter event title" maxlength="100">
+                                        <div class="form-text retro-text">Make it catchy and descriptive</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-medium">Organization</label>
+                                        <input type="text" class="form-control retro-input" value="{{ session.organization }}" 
+                                               readonly style="background-color: var(--light-grey);">
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <label class="form-label fw-medium">Event Description *</label>
+                                    <textarea class="form-control retro-input" name="description" rows="4" required 
+                                              placeholder="Describe your event in detail..."></textarea>
+                                    <div class="form-text retro-text">
+                                        Include key highlights, objectives, and what participants can expect
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Date & Time Section -->
+                        <div class="row mb-5">
+                            <div class="col-12">
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="feature-icon me-3">
+                                        <i class="bi bi-calendar-event fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="fw-bold retro-heading mb-1">Date & Time</h4>
+                                        <p class="retro-text mb-0">When and where your event happens</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-medium">Event Date *</label>
+                                        <input type="date" class="form-control retro-input" name="date" required 
+                                               id="eventDate" min="">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-medium">Event Time *</label>
+                                        <input type="time" class="form-control retro-input" name="time" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-3">
+                                    <label class="form-label fw-medium">Venue *</label>
+                                    <input type="text" class="form-control retro-input" name="venue" required 
+                                           placeholder="Enter event venue address">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Event Details Section -->
+                        <div class="row mb-5">
+                            <div class="col-12">
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="feature-icon me-3">
+                                        <i class="bi bi-gear fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="fw-bold retro-heading mb-1">Event Details</h4>
+                                        <p class="retro-text mb-0">Configure event specifications</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-medium">Capacity *</label>
+                                        <input type="number" class="form-control retro-input" name="capacity" required 
+                                               min="1" max="1000" value="50">
+                                        <div class="form-text retro-text">Maximum number of participants</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-medium">Registration Fee (₹) *</label>
+                                        <input type="number" class="form-control retro-input" name="fee" required 
+                                               min="0" step="0.01" value="0" id="eventFee">
+                                        <div class="form-text retro-text">Enter 0 for free events</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-medium">Prize Pool</label>
+                                        <input type="text" class="form-control retro-input" name="prize_pool" 
+                                               placeholder="e.g., ₹50,000" id="prizePool">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Event Type Section -->
+                        <div class="row mb-5">
+                            <div class="col-12">
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="feature-icon me-3">
+                                        <i class="bi bi-people fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="fw-bold retro-heading mb-1">Event Type</h4>
+                                        <p class="retro-text mb-0">Choose participation format</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch team-event-toggle">
+                                            <input class="form-check-input" type="checkbox" 
+                                                   name="is_team_event" id="isTeamEvent" value="true">
+                                            <label class="form-check-label fw-medium" for="isTeamEvent">
+                                                Team Event
+                                            </label>
+                                        </div>
+                                        <div class="form-text retro-text">
+                                            Enable if participants can register as teams
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 team-size-field" id="teamSizeField" style="display: none;">
+                                        <label class="form-label fw-medium">Team Size</label>
+                                        <input type="number" class="form-control retro-input" name="team_size" 
+                                               min="2" max="10" value="4" id="teamSize">
+                                        <div class="form-text retro-text">Number of participants per team</div>
+                                    </div>
+                                </div>
+
+                                <!-- Team Registration Fields (Hidden by default) -->
+                                <div id="teamRegistrationFields" style="display: none;">
+                                    <div class="mt-4 p-4 retro-card bg-light">
+                                        <h6 class="fw-bold mb-3 retro-heading">
+                                            <i class="bi bi-person-badge me-2"></i>Team Registration Settings
+                                        </h6>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label fw-medium">Team Leader Information Required</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="require_team_leader" id="requireTeamLeader" checked>
+                                                <label class="form-check-label" for="requireTeamLeader">
+                                                    Collect team leader details (Name, Email, Phone)
+                                                </label>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label fw-medium">Participant Information</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="collect_participant_info" id="collectParticipantInfo" checked>
+                                                <label class="form-check-label" for="collectParticipantInfo">
+                                                    Collect details for all team members
+                                                </label>
+                                            </div>
+                                            <div class="form-text retro-text">
+                                                If enabled, team leader will need to provide information for all team members during registration
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label fw-medium">Payment Mode</label>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="payment_mode" id="individualPayment" value="individual" checked>
+                                                <label class="form-check-label" for="individualPayment">
+                                                    Individual payments (each member pays separately)
+                                                </label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="payment_mode" id="teamPayment" value="team">
+                                                <label class="form-check-label" for="teamPayment">
+                                                    Team payment (team leader pays for entire team)
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Event Image Section -->
+                        <div class="row mb-5">
+                            <div class="col-12">
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="feature-icon me-3">
+                                        <i class="bi bi-image fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="fw-bold retro-heading mb-1">Event Image</h4>
+                                        <p class="retro-text mb-0">Add visual appeal to your event</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label fw-medium">Image URL</label>
+                                    <input type="url" class="form-control retro-input" name="image_url" 
+                                           placeholder="https://example.com/event-image.jpg">
+                                    <div class="form-text retro-text">
+                                        Provide a direct link to your event image. Recommended size: 800x400px
+                                    </div>
+                                </div>
+                                <div class="alert retro-card bg-light mt-3">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <strong>Note:</strong> If no image URL is provided, a default event image will be used.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Gateway Preview (Only show if fee > 0) -->
+                        <div class="row mb-5" id="paymentPreviewSection" style="display: none;">
+                            <div class="col-12">
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="feature-icon me-3">
+                                        <i class="bi bi-credit-card fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="fw-bold retro-heading mb-1">Payment Gateway</h4>
+                                        <p class="retro-text mb-0">Preview how payment will appear to participants</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="retro-card bg-light p-4">
+                                    <h6 class="fw-bold mb-3">Payment Preview</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="payment-method-card retro-card p-3 mb-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="preview_payment_method" checked>
+                                                    <label class="form-check-label fw-medium">
+                                                        <i class="bi bi-credit-card me-2"></i>Credit/Debit Card
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="payment-method-card retro-card p-3 mb-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="preview_payment_method">
+                                                    <label class="form-check-label fw-medium">
+                                                        <i class="bi bi-wallet me-2"></i>UPI Payment
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="payment-method-card retro-card p-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="preview_payment_method">
+                                                    <label class="form-check-label fw-medium">
+                                                        <i class="bi bi-bank me-2"></i>Net Banking
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="retro-card p-3">
+                                                <h6 class="fw-bold mb-3">Order Summary</h6>
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span>Event Fee</span>
+                                                    <span id="previewFee">₹0</span>
+                                                </div>
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span>GST (18%)</span>
+                                                    <span id="previewGst">₹0</span>
+                                                </div>
+                                                <hr>
+                                                <div class="d-flex justify-content-between fw-bold">
+                                                    <span>Total Amount</span>
+                                                    <span id="previewTotal">₹0</span>
+                                                </div>
+                                                <button type="button" class="btn btn-dark w-100 mt-3 retro-btn" disabled>
+                                                    Pay Now
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-text retro-text mt-3">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        This is a preview. Actual payment gateway will be integrated during participant registration.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <button type="button" class="btn btn-outline-dark retro-btn-outline" id="previewBtn">
+                                            <i class="bi bi-eye me-2"></i>Preview Event
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <button type="reset" class="btn btn-outline-dark retro-btn-outline me-3">
+                                            <i class="bi bi-arrow-clockwise me-2"></i>Reset Form
+                                        </button>
+                                        <button type="submit" class="btn btn-dark retro-btn">
+                                            <i class="bi bi-check-lg me-2"></i>Create Event
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mock Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content retro-card">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold retro-heading">Payment Gateway</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <div class="feature-icon mx-auto mb-3">
+                        <i class="bi bi-credit-card fs-3"></i>
+                    </div>
+                    <h6 class="fw-bold">Secure Payment</h6>
+                    <p class="retro-text mb-0">This is a mock payment gateway for preview</p>
+                </div>
+                
+                <div class="retro-card bg-light p-3 mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Event Fee</span>
+                        <span id="modalEventFee">₹0</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>GST (18%)</span>
+                        <span id="modalGst">₹0</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold">
+                        <span>Total Amount</span>
+                        <span id="modalTotal">₹0</span>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-medium">Card Number</label>
+                    <input type="text" class="form-control retro-input" placeholder="1234 5678 9012 3456" value="4111 1111 1111 1111">
+                </div>
+                
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium">Expiry Date</label>
+                        <input type="text" class="form-control retro-input" placeholder="MM/YY" value="12/25">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-medium">CVV</label>
+                        <input type="text" class="form-control retro-input" placeholder="123" value="123">
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-medium">Cardholder Name</label>
+                    <input type="text" class="form-control retro-input" placeholder="John Doe" value="Test User">
+                </div>
+                
+                <button type="button" class="btn btn-dark w-100 retro-btn" id="mockPaymentBtn">
+                    <i class="bi bi-lock me-2"></i>Pay Now
+                </button>
+                
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        <i class="bi bi-shield-check me-1"></i>
+                        This is a demo payment. No real transaction will occur.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const teamEventToggle = document.getElementById('isTeamEvent');
+    const teamSizeField = document.getElementById('teamSizeField');
+    const teamRegistrationFields = document.getElementById('teamRegistrationFields');
+    const teamSizeInput = document.getElementById('teamSize');
+    const previewBtn = document.getElementById('previewBtn');
+    const eventForm = document.getElementById('eventForm');
+    const eventDateInput = document.getElementById('eventDate');
+    const eventFeeInput = document.getElementById('eventFee');
+    const paymentPreviewSection = document.getElementById('paymentPreviewSection');
+    const prizePoolInput = document.getElementById('prizePool');
+
+    // Set minimum date to today
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const minDate = `${yyyy}-${mm}-${dd}`;
+    eventDateInput.min = minDate;
+
+    // Team event toggle
+    teamEventToggle.addEventListener('change', function() {
+        if (this.checked) {
+            teamSizeField.style.display = 'block';
+            teamRegistrationFields.style.display = 'block';
+            teamSizeInput.required = true;
+        } else {
+            teamSizeField.style.display = 'none';
+            teamRegistrationFields.style.display = 'none';
+            teamSizeInput.required = false;
+        }
+    });
+
+    // Update payment preview when fee changes
+    eventFeeInput.addEventListener('input', updatePaymentPreview);
+
+    function updatePaymentPreview() {
+        const fee = parseFloat(eventFeeInput.value) || 0;
+        
+        if (fee > 0) {
+            paymentPreviewSection.style.display = 'block';
+            
+            const gst = fee * 0.18;
+            const total = fee + gst;
+            
+            // Update preview section
+            document.getElementById('previewFee').textContent = `₹${fee.toFixed(2)}`;
+            document.getElementById('previewGst').textContent = `₹${gst.toFixed(2)}`;
+            document.getElementById('previewTotal').textContent = `₹${total.toFixed(2)}`;
+            
+            // Update modal
+            document.getElementById('modalEventFee').textContent = `₹${fee.toFixed(2)}`;
+            document.getElementById('modalGst').textContent = `₹${gst.toFixed(2)}`;
+            document.getElementById('modalTotal').textContent = `₹${total.toFixed(2)}`;
+        } else {
+            paymentPreviewSection.style.display = 'none';
+        }
+    }
+
+    // Form validation
+    eventForm.addEventListener('submit', function(e) {
+        const requiredFields = this.querySelectorAll('[required]');
+        let isValid = true;
+
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('is-invalid');
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+
+        // Validate date
+        const selectedDate = new Date(eventDateInput.value);
+        if (selectedDate < today) {
+            isValid = false;
+            eventDateInput.classList.add('is-invalid');
+            EventHub.showNotification('Event date cannot be in the past!', 'error');
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+            EventHub.showNotification('Please fill in all required fields correctly.', 'error');
+        }
+    });
+
+    // Preview functionality
+    previewBtn.addEventListener('click', function() {
+        // Collect form data
+        const formData = new FormData(eventForm);
+        const eventData = {};
+        
+        for (let [key, value] of formData.entries()) {
+            eventData[key] = value;
+        }
+
+        // Show preview in modal
+        const previewContent = `
+            <div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content retro-card">
+                        <div class="modal-header border-bottom">
+                            <h5 class="modal-title fw-bold retro-heading">Event Preview</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-12">
+                                    <h4 class="fw-bold mb-3 retro-heading">${eventData.title || 'Event Title'}</h4>
+                                    <div class="retro-card bg-light p-3 mb-3">
+                                        <h6 class="fw-bold mb-2"><i class="bi bi-info-circle me-2"></i>Description</h6>
+                                        <p class="mb-0">${eventData.description || 'No description provided'}</p>
+                                    </div>
+                                    
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="d-flex align-items-center text-muted mb-2">
+                                                <i class="bi bi-calendar-event me-2"></i>
+                                                <small class="fw-medium">${eventData.date || 'Not set'} at ${eventData.time || 'Not set'}</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="d-flex align-items-center text-muted mb-2">
+                                                <i class="bi bi-geo-alt me-2"></i>
+                                                <small class="fw-medium">${eventData.venue || 'Not specified'}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row g-3 mt-2">
+                                        <div class="col-md-4">
+                                            <div class="d-flex align-items-center text-muted">
+                                                <i class="bi bi-people me-2"></i>
+                                                <small class="fw-medium">Capacity: ${eventData.capacity || '0'}</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="d-flex align-items-center text-muted">
+                                                <i class="bi bi-currency-rupee me-2"></i>
+                                                <small class="fw-medium">Fee: ₹${eventData.fee || '0'}</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="d-flex align-items-center text-muted">
+                                                <i class="bi bi-trophy me-2"></i>
+                                                <small class="fw-medium">${eventData.is_team_event ? 'Team Event' : 'Individual Event'}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    ${eventData.is_team_event ? `
+                                    <div class="row g-3 mt-2">
+                                        <div class="col-12">
+                                            <div class="d-flex align-items-center text-muted">
+                                                <i class="bi bi-people-fill me-2"></i>
+                                                <small class="fw-medium">Team Size: ${eventData.team_size || '4'} members</small>
+                                            </div>
+                                        </div>
+                                        ${eventData.require_team_leader ? `
+                                        <div class="col-12">
+                                            <div class="d-flex align-items-center text-muted">
+                                                <i class="bi bi-person-badge me-2"></i>
+                                                <small class="fw-medium">Team Leader Info: Required</small>
+                                            </div>
+                                        </div>
+                                        ` : ''}
+                                        ${eventData.collect_participant_info ? `
+                                        <div class="col-12">
+                                            <div class="d-flex align-items-center text-muted">
+                                                <i class="bi bi-person-lines-fill me-2"></i>
+                                                <small class="fw-medium">All Team Members Info: Required</small>
+                                            </div>
+                                        </div>
+                                        ` : ''}
+                                        ${eventData.payment_mode ? `
+                                        <div class="col-12">
+                                            <div class="d-flex align-items-center text-muted">
+                                                <i class="bi bi-credit-card me-2"></i>
+                                                <small class="fw-medium">Payment: ${eventData.payment_mode === 'team' ? 'Team Payment' : 'Individual Payments'}</small>
+                                            </div>
+                                        </div>
+                                        ` : ''}
+                                    </div>
+                                    ` : ''}
+                                    
+                                    ${eventData.prize_pool ? `
+                                    <div class="row g-3 mt-2">
+                                        <div class="col-12">
+                                            <div class="d-flex align-items-center text-muted">
+                                                <i class="bi bi-award me-2"></i>
+                                                <small class="fw-medium">Prize Pool: ${eventData.prize_pool}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-top">
+                            ${parseFloat(eventData.fee) > 0 ? `
+                            <button type="button" class="btn btn-outline-dark retro-btn-outline me-2" id="previewPaymentBtn">
+                                <i class="bi bi-credit-card me-2"></i>Preview Payment
+                            </button>
+                            ` : ''}
+                            <button type="button" class="btn btn-dark retro-btn" data-bs-dismiss="modal">Close Preview</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Remove existing modal if any
+        const existingModal = document.getElementById('previewModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Add and show new modal
+        document.body.insertAdjacentHTML('beforeend', previewContent);
+        const previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
+        previewModal.show();
+
+        // Add payment preview button functionality
+        document.getElementById('previewPaymentBtn')?.addEventListener('click', function() {
+            previewModal.hide();
+            const paymentModal = new bootstrap.Modal(document.getElementById('paymentModal'));
+            paymentModal.show();
+        });
+    });
+
+    // Mock payment functionality
+    document.getElementById('mockPaymentBtn')?.addEventListener('click', function() {
+        const btn = this;
+        const originalText = btn.innerHTML;
+        
+        btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Processing...';
+        btn.disabled = true;
+        
+        setTimeout(() => {
+            btn.innerHTML = '<i class="bi bi-check-lg me-2"></i>Payment Successful!';
+            btn.classList.remove('btn-dark');
+            btn.classList.add('btn-success');
+            
+            setTimeout(() => {
+                const paymentModal = bootstrap.Modal.getInstance(document.getElementById('paymentModal'));
+                paymentModal.hide();
+                
+                // Reset button
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-dark');
+                }, 1000);
+            }, 1500);
+        }, 2000);
+    });
+
+    // Auto-format prize pool input
+    prizePoolInput.addEventListener('blur', function() {
+        if (this.value && !this.value.includes('₹')) {
+            const numericValue = this.value.replace(/[^\d]/g, '');
+            if (numericValue) {
+                this.value = '₹' + numericValue;
+            }
+        }
+    });
+
+    // Date validation
+    eventDateInput.addEventListener('change', function() {
+        const selectedDate = new Date(this.value);
+        if (selectedDate < today) {
+            this.classList.add('is-invalid');
+            EventHub.showNotification('Event date cannot be in the past!', 'error');
+        } else {
+            this.classList.remove('is-invalid');
+        }
+    });
+
+    // Initialize payment preview
+    updatePaymentPreview();
+
+    // Initialize AOS animations
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100
+        });
+    }
+});
+</script>
+
+<style>
+.feature-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--light-grey);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--dark-grey);
+}
+
+.team-event-toggle {
+    cursor: pointer;
+}
+
+.team-event-toggle .form-check-input {
+    width: 3em;
+    height: 1.5em;
+}
+
+.team-size-field, .team-registration-fields {
+    transition: all 0.3s ease;
+}
+
+.payment-method-card {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.payment-method-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Form section spacing */
+.row.mb-5 {
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--light-grey);
+}
+
+.row.mb-5:last-of-type {
+    border-bottom: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 2rem 1.5rem !important;
+    }
+    
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .d-flex.justify-content-between > div {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,418 @@
+{% extends "base.html" %}
+
+{% block title %}User Dashboard - EventHub{% endblock %}
+
+{% block content %}
+<div class="container py-4 mt-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-5" data-aos="fade-up" data-aos-duration="600">
+        <div>
+            <h1 class="display-5 fw-bold mb-2 retro-heading">Welcome, <span class="retro-accent">{{ session.full_name }}</span>!</h1>
+            <p class="lead retro-text">Discover and register for amazing events.</p>
+        </div>
+        <a href="{{ url_for('events') }}" class="btn btn-dark retro-btn">
+            <i class="bi bi-search me-2"></i>Browse Events
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Upcoming Events -->
+        <div class="col-lg-8 mb-4">
+            <div class="card retro-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="100">
+                <div class="card-header border-bottom py-3">
+                    <h5 class="card-title mb-0 fw-bold retro-heading">Upcoming <span class="retro-accent">Events</span></h5>
+                </div>
+                <div class="card-body p-4">
+                    {% if events %}
+                    <div class="row g-3">
+                        {% for event in events %}
+                        <div class="col-md-6">
+                            <div class="card h-100 retro-card event-card">
+                                <div class="position-relative overflow-hidden">
+                                    <img src="{{ event.image_url or '/static/images/event-default.jpg' }}" 
+                                         class="card-img-top event-card-img retro-image" 
+                                         alt="{{ event.title }}"
+                                         onerror="this.src='/static/images/event-default.jpg'">
+                                    <div class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge retro-badge">
+                                            {{ 'Team Event' if event.is_team_event else 'Individual' }}
+                                        </span>
+                                    </div>
+                                    <div class="position-absolute top-0 start-0 m-2">
+                                        <span class="badge retro-badge-dark">₹{{ event.fee }}</span>
+                                    </div>
+                                </div>
+                                <div class="card-body d-flex flex-column p-3">
+                                    <div class="mb-2">
+                                        <span class="badge retro-badge-light mb-2">{{ event.organization }}</span>
+                                        <h6 class="card-title fw-bold mb-2">{{ event.title }}</h6>
+                                        <p class="card-text text-muted small">{{ event.description[:80] }}...</p>
+                                    </div>
+                                    
+                                    <div class="event-meta small text-muted mb-3">
+                                        <div class="d-flex align-items-center mb-1">
+                                            <i class="bi bi-calendar-event me-2"></i>
+                                            {{ event.date }}
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-geo-alt me-2"></i>
+                                            {{ event.venue }}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fw-bold">₹{{ event.fee }}</span>
+                                            {% if session.username %}
+                                                {% if session.role in ['Host', 'Organizer', 'Admin'] and event.host == session.username %}
+                                                    <button class="btn btn-outline-dark retro-btn-outline btn-sm" disabled>
+                                                        Your Event
+                                                    </button>
+                                                {% else %}
+                                                    <button type="button" class="btn btn-dark retro-btn btn-sm" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#registerModal{{ event._id }}">
+                                                        Register
+                                                    </button>
+                                                {% endif %}
+                                            {% else %}
+                                                <a href="{{ url_for('login') }}" class="btn btn-dark retro-btn btn-sm">
+                                                    Login to Register
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4" data-aos="fade-up">
+                        <i class="bi bi-calendar-x display-1 text-muted"></i>
+                        <h5 class="text-muted mt-3 retro-heading">No Events Available</h5>
+                        <p class="retro-text">Check back later for new events.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- My Registrations -->
+            <div class="card retro-card mb-4" data-aos="fade-up" data-aos-duration="600" data-aos-delay="200">
+                <div class="card-header border-bottom py-3">
+                    <h5 class="card-title mb-0 fw-bold retro-heading">My <span class="retro-accent">Registrations</span></h5>
+                </div>
+                <div class="card-body p-3">
+                    {% if registrations %}
+                    <div class="list-group list-group-flush">
+                        {% for reg in registrations %}
+                        <div class="list-group-item px-0 border-0 mb-2">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="fw-bold mb-0">{{ reg.event_name }}</h6>
+                                <span class="badge retro-badge-{{ 'success' if reg.is_checked_in else 'warning' }}">
+                                    {{ 'Checked In' if reg.is_checked_in else 'Registered' }}
+                                </span>
+                            </div>
+                            <small class="text-muted d-block">Registered on: {{ reg.created_at.strftime('%b %d, %Y') }}</small>
+                            {% if reg.qr_code %}
+                            <button class="btn btn-sm btn-outline-dark retro-btn-outline mt-2" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#qrModal{{ reg._id }}">
+                                View QR Code
+                            </button>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-ticket-perforated display-1 text-muted"></i>
+                        <h6 class="text-muted mt-3 retro-heading">No Registrations Yet</h6>
+                        <p class="retro-text small">Register for an event to see your tickets here.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="card retro-card" data-aos="fade-up" data-aos-duration="600" data-aos-delay="300">
+                <div class="card-header border-bottom py-3">
+                    <h5 class="card-title mb-0 fw-bold retro-heading">My Event <span class="retro-accent">Stats</span></h5>
+                </div>
+                <div class="card-body p-3">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <h3 class="fw-bold">{{ registrations|length }}</h3>
+                            <small class="text-muted">Events Registered</small>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <h3 class="fw-bold text-success">
+                                {{ registrations|selectattr('is_checked_in')|list|length }}
+                            </h3>
+                            <small class="text-muted">Events Attended</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Registration Modals - Placed outside the main content for better performance -->
+{% for event in events %}
+<div class="modal fade" id="registerModal{{ event._id }}" tabindex="-1" aria-labelledby="registerModalLabel{{ event._id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content retro-card">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold retro-heading" id="registerModalLabel{{ event._id }}">Register for {{ event.title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('register_event', event_id=event._id) }}">
+                <div class="modal-body">
+                    <!-- Event Details -->
+                    <div class="retro-card bg-light p-3 mb-4">
+                        <h6 class="fw-bold mb-2"><i class="bi bi-info-circle me-2"></i>Event Details</h6>
+                        <div class="text-muted small">
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="bi bi-calendar-event me-2"></i>
+                                <span><strong>Date & Time:</strong> {{ event.date }} at {{ event.time }}</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="bi bi-geo-alt me-2"></i>
+                                <span><strong>Venue:</strong> {{ event.venue }}</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-currency-rupee me-2"></i>
+                                <span><strong>Fee:</strong> ₹{{ event.fee }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium">Full Name *</label>
+                            <input type="text" class="form-control retro-input" name="full_name" 
+                                   value="{{ session.full_name }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium">Email *</label>
+                            <input type="email" class="form-control retro-input" name="email" 
+                                   value="{{ session.email }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium">Phone Number *</label>
+                            <input type="tel" class="form-control retro-input" name="phone" 
+                                   pattern="[0-9]{10}" placeholder="10-digit mobile number" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium">PRN Number *</label>
+                            <input type="text" class="form-control retro-input" name="prn" 
+                                   placeholder="Your PRN/Student ID" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3 mt-2">
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium">Class *</label>
+                            <input type="text" class="form-control retro-input" name="class_name" 
+                                   placeholder="e.g., FY B.Tech, SY B.Sc" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium">Branch *</label>
+                            <input type="text" class="form-control retro-input" name="branch" 
+                                   placeholder="e.g., Computer Science" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <label class="form-label fw-medium">Address *</label>
+                        <textarea class="form-control retro-input" name="address" rows="2" 
+                                  placeholder="Your complete address" required></textarea>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <label class="form-label fw-medium">Number of Participants *</label>
+                        <input type="number" class="form-control retro-input" name="num_participants" 
+                               value="1" min="1" max="{{ event.team_size if event.is_team_event else 1 }}" required>
+                        <div class="form-text text-muted">
+                            {% if event.is_team_event %}
+                                Maximum {{ event.team_size }} participants per team
+                            {% else %}
+                                Individual participation only
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-outline-dark retro-btn-outline" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-dark retro-btn">
+                        <i class="bi bi-check-lg me-2"></i>Complete Registration
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- QR Code Modals - Placed outside the registrations loop -->
+{% for reg in registrations if reg.qr_code %}
+<div class="modal fade" id="qrModal{{ reg._id }}" tabindex="-1" aria-labelledby="qrModalLabel{{ reg._id }}" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content retro-card">
+            <div class="modal-header border-bottom">
+                <h6 class="modal-title fw-bold" id="qrModalLabel{{ reg._id }}">QR Code - {{ reg.event_name }}</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <img src="data:image/png;base64,{{ reg.qr_code }}" 
+                     alt="QR Code for {{ reg.event_name }}" class="img-fluid rounded">
+                <p class="small text-muted mt-3">Show this QR code at event check-in</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize AOS animations
+    AOS.init({
+        duration: 800,
+        once: true,
+        offset: 100
+    });
+
+    // Add hover effects to cards
+    const cards = document.querySelectorAll('.retro-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.transition = 'transform 0.3s ease';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+
+    // Simple form submission handling
+    const registrationForms = document.querySelectorAll('form[action*="/register"]');
+    
+    registrationForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            // Show loading state
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Registering...';
+            submitBtn.disabled = true;
+
+            // Allow the form to submit normally
+            // The loading state is just visual feedback
+            
+            // If there's an issue with submission, reset button after 5 seconds
+            setTimeout(() => {
+                if (submitBtn.disabled) {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    console.log('Form submission timeout - resetting button');
+                }
+            }, 5000);
+        });
+    });
+
+    // Debug: Check if all modals are working
+    document.addEventListener('click', function(e) {
+        if (e.target.matches('.btn[data-bs-toggle="modal"]')) {
+            const target = e.target.getAttribute('data-bs-target');
+            console.log('Modal button clicked, target:', target);
+            
+            // Check if modal exists
+            const modal = document.querySelector(target);
+            if (modal) {
+                console.log('Modal found:', modal.id);
+            } else {
+                console.log('Modal NOT found for target:', target);
+            }
+        }
+    });
+
+    // Initialize all Bootstrap modals properly
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+        // This ensures Bootstrap can properly manage the modal
+        console.log('Modal initialized:', modal.id);
+    });
+});
+</script>
+
+<style>
+.event-card-img {
+    height: 160px;
+    object-fit: cover;
+}
+
+.list-group-item {
+    border: none !important;
+    padding: 0.75rem 0;
+}
+
+.badge.retro-badge-success {
+    background: var(--success-color);
+    color: white;
+}
+
+.badge.retro-badge-warning {
+    background: var(--warning-color);
+    color: white;
+}
+
+.retro-badge-light {
+    background: var(--light-grey);
+    color: var(--pure-black);
+}
+
+/* Ensure form inputs are visible and accessible */
+.form-control.retro-input {
+    background-color: white;
+    border: 2px solid var(--dark-grey);
+    color: var(--pure-black);
+}
+
+.form-control.retro-input:focus {
+    background-color: white;
+    border-color: var(--pure-black);
+    box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.1);
+}
+
+.form-label {
+    color: var(--pure-black);
+    font-weight: 500;
+}
+
+/* QR Code image styling */
+.modal-body img {
+    max-width: 100%;
+    height: auto;
+    border: 2px solid var(--dark-grey);
+}
+
+@media (max-width: 768px) {
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .display-5 {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock %}
