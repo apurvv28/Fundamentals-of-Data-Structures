@@ -19,6 +19,8 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body class="d-flex flex-column min-vh-100">
+    <!-- Toast Notifications Container -->
+<div class="toast-container" id="toastContainer"></div>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light fixed-top retro-navbar">
         <div class="container">
@@ -162,7 +164,7 @@
             </div>
             <hr class="my-4 retro-hr">
             <div class="text-center text-muted">
-                <small>&copy; 2024 EventHub. All rights reserved. | Designed with <i class="bi bi-heart-fill"></i></small>
+                <small>&copy; 2025 EventHub. All rights reserved. | Designed with <i class="bi bi-heart-fill"></i></small>
             </div>
         </div>
     </footer>
@@ -221,6 +223,174 @@
                 });
             }
         });
+        // Toast Notification System
+class ToastManager {
+    constructor() {
+        this.container = document.getElementById('toastContainer');
+        this.toasts = new Set();
+    }
+
+    show(message, type = 'info', duration = 5000) {
+        const toast = this.createToast(message, type, duration);
+        this.container.appendChild(toast);
+        this.toasts.add(toast);
+
+        // Animate in
+        requestAnimationFrame(() => {
+            toast.classList.add('show', 'slide-in');
+        });
+
+        // Auto remove after duration
+        if (duration > 0) {
+            setTimeout(() => {
+                this.removeToast(toast);
+            }, duration);
+        }
+
+        return toast;
+    }
+
+    createToast(message, type, duration) {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        const icons = {
+            success: 'bi-check-circle-fill',
+            error: 'bi-x-circle-fill',
+            warning: 'bi-exclamation-triangle-fill',
+            info: 'bi-info-circle-fill'
+        };
+
+        toast.innerHTML = `
+            <i class="toast-icon bi ${icons[type]}"></i>
+            <div class="toast-content">${message}</div>
+            <button class="toast-close" type="button">
+                <i class="bi bi-x"></i>
+            </button>
+            ${duration > 0 ? '<div class="toast-progress"></div>' : ''}
+        `;
+
+        // Close button event
+        const closeBtn = toast.querySelector('.toast-close');
+        closeBtn.addEventListener('click', () => {
+            this.removeToast(toast);
+        });
+
+        return toast;
+    }
+
+    removeToast(toast) {
+        if (!this.toasts.has(toast)) return;
+
+        toast.classList.remove('show');
+        toast.classList.add('fade-out');
+        
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+            this.toasts.delete(toast);
+        }, 300);
+    }
+
+    success(message, duration = 5000) {
+        return this.show(message, 'success', duration);
+    }
+
+    error(message, duration = 5000) {
+        return this.show(message, 'error', duration);
+    }
+
+    warning(message, duration = 5000) {
+        return this.show(message, 'warning', duration);
+    }
+
+    info(message, duration = 5000) {
+        return this.show(message, 'info', duration);
+    }
+
+    clearAll() {
+        this.toasts.forEach(toast => {
+            this.removeToast(toast);
+        });
+    }
+}
+
+// Initialize toast manager
+const toastManager = new ToastManager();
+
+// Make it globally available
+window.toastManager = toastManager;
+
+// Flash message handler (for Flask flash messages)
+document.addEventListener('DOMContentLoaded', function() {
+    // Check for flash messages in the template
+    const flashMessages = document.querySelectorAll('.flash-message');
+    flashMessages.forEach(messageElement => {
+        const message = messageElement.textContent.trim();
+        const category = messageElement.className.replace('flash-message', '').trim();
+        
+        if (message) {
+            let type = 'info';
+            if (category.includes('success')) type = 'success';
+            if (category.includes('error')) type = 'error';
+            if (category.includes('warning')) type = 'warning';
+            
+            toastManager[type](message);
+            
+            // Remove the original flash message element
+            messageElement.remove();
+        }
+    });
+
+    // Handle AJAX responses
+    document.addEventListener('ajax:success', function(event) {
+        const response = event.detail[0];
+        if (response.message) {
+            toastManager.success(response.message);
+        }
+    });
+
+    document.addEventListener('ajax:error', function(event) {
+        const error = event.detail[0];
+        const message = error.message || 'An error occurred';
+        toastManager.error(message);
+    });
+});
+
+// Utility function for API responses
+function handleApiResponse(response, successMessage = null) {
+    if (response.success) {
+        if (successMessage) {
+            toastManager.success(successMessage);
+        } else if (response.message) {
+            toastManager.success(response.message);
+        }
+        return true;
+    } else {
+        toastManager.error(response.error || 'An error occurred');
+        return false;
+    }
+}
+// Handle Flask flash messages
+document.addEventListener('DOMContentLoaded', function() {
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                {% set toast_type = 'info' %}
+                {% if category == 'success' %}
+                    {% set toast_type = 'success' %}
+                {% elif category == 'error' %}
+                    {% set toast_type = 'error' %}
+                {% elif category == 'warning' %}
+                    {% set toast_type = 'warning' %}
+                {% endif %}
+                
+                toastManager.{{ toast_type }}('{{ message }}');
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+});
     </script>
 </body>
 </html>

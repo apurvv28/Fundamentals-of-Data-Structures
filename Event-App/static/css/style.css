@@ -1,15 +1,18 @@
 :root {
-    --pure-white: #ffffff;
-    --off-white: #f8f9fa;
-    --light-grey: #e9ecef;
-    --medium-grey: #6c757d;
-    --dark-grey: #343a40;
-    --pure-black: #000000;
+    --pure-white: #F5F5DC;
+    --off-white: #D9C2AD;
+    --light-grey: #C9A185;
+    --medium-grey: #824F4F;
+    --dark-grey: #735236;
+    --pure-black: #23241f;
     --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
     --shadow-md: 0 4px 6px rgba(0,0,0,0.15);
     --shadow-lg: 0 10px 25px rgba(0,0,0,0.2);
     --shadow-xl: 0 20px 50px rgba(0,0,0,0.25);
 }
+
+/* Funky Cute Font Imports */
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Chewy&family=Fredoka+One&family=Nunito:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
 
 * {
     margin: 0;
@@ -18,46 +21,61 @@
 }
 
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Comic Neue', 'Nunito', cursive;
     line-height: 1.7;
     color: var(--dark-grey);
     background-color: var(--pure-white);
     min-height: 100vh;
+    font-weight: 400;
+    letter-spacing: 0.01em;
 }
 
-/* Typography */
+/* Funky Cute Typography */
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', serif;
-    font-weight: 600;
+    font-family: 'Chewy', 'Fredoka One', cursive;
+    font-weight: 400;
     color: var(--pure-black);
+    letter-spacing: 0.02em;
+    line-height: 1.2;
 }
 
 .retro-heading {
     color: var(--pure-black);
-    letter-spacing: -0.02em;
+    letter-spacing: 0.03em;
+    font-weight: 400;
+    font-family: 'Fredoka One', cursive;
 }
 
 .retro-accent {
     color: var(--pure-black);
     position: relative;
+    font-weight: 400;
 }
 
 .retro-accent::after {
     content: '';
     position: absolute;
-    bottom: -2px;
+    bottom: -4px;
     left: 0;
     width: 100%;
     height: 2px;
     background: var(--pure-black);
+    transform: scaleX(0.8);
+    transform-origin: left;
 }
 
 .retro-text {
     color: var(--dark-grey);
+    font-family: 'Comic Neue', cursive;
+    font-weight: 300;
+    letter-spacing: 0.01em;
 }
 
 .text-muted {
-    color: var(--medium-grey) !important;
+    color: var(--pure-black) !important;
+    font-family: 'Comic Neue', cursive;
+    font-weight: 300;
+    opacity: 0.8;
 }
 
 /* Navigation */
@@ -67,6 +85,7 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: var(--shadow-sm);
     transition: all 0.3s ease;
     padding: 1rem 0;
+    font-family: 'Comic Neue', cursive;
 }
 
 .retro-navbar.navbar-scrolled {
@@ -78,14 +97,19 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 1.5rem;
     font-weight: 700;
     color: var(--pure-black) !important;
+    font-family: 'Chewy', cursive;
+    letter-spacing: 0.05em;
 }
 
 .navbar-nav .nav-link {
-    font-weight: 500;
+    font-weight: 400;
     color: var(--dark-grey) !important;
     transition: all 0.3s ease;
     position: relative;
     padding: 0.5rem 1rem !important;
+    font-family: 'Comic Neue', cursive;
+    font-size: 0.95rem;
+    letter-spacing: 0.03em;
 }
 
 .navbar-nav .nav-link:hover {
@@ -98,7 +122,7 @@ h1, h2, h3, h4, h5, h6 {
     bottom: -2px;
     left: 1rem;
     width: 0;
-    height: 2px;
+    height: 1px;
     background: var(--pure-black);
     transition: width 0.3s ease;
 }
@@ -113,11 +137,14 @@ h1, h2, h3, h4, h5, h6 {
     border: 2px solid var(--pure-black);
     border-radius: 8px;
     box-shadow: var(--shadow-lg);
+    font-family: 'Comic Neue', cursive;
 }
 
 .dropdown-item {
     color: var(--dark-grey);
     transition: all 0.3s ease;
+    font-weight: 300;
+    font-size: 0.9rem;
 }
 
 .dropdown-item:hover {
@@ -137,6 +164,7 @@ h1, h2, h3, h4, h5, h6 {
     justify-content: center;
     font-weight: 600;
     font-size: 0.875rem;
+    font-family: 'Comic Neue', cursive;
 }
 
 /* Buttons */
@@ -145,11 +173,14 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--pure-white);
     border: 2px solid var(--pure-black);
     border-radius: 8px;
-    font-weight: 500;
+    font-weight: 400;
     padding: 0.75rem 1.5rem;
     transition: all 0.3s ease;
     text-decoration: none;
     display: inline-block;
+    font-family: 'Comic Neue', cursive;
+    letter-spacing: 0.03em;
+    font-size: 0.9rem;
 }
 
 .retro-btn:hover {
@@ -164,9 +195,12 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--pure-black);
     border: 2px solid var(--pure-black);
     border-radius: 8px;
-    font-weight: 500;
+    font-weight: 400;
     padding: 0.75rem 1.5rem;
     transition: all 0.3s ease;
+    font-family: 'Comic Neue', cursive;
+    letter-spacing: 0.03em;
+    font-size: 0.9rem;
 }
 
 .retro-btn-outline:hover {
@@ -180,9 +214,12 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--pure-black);
     border: 2px solid var(--pure-white);
     border-radius: 8px;
-    font-weight: 500;
+    font-weight: 400;
     padding: 0.75rem 1.5rem;
     transition: all 0.3s ease;
+    font-family: 'Comic Neue', cursive;
+    letter-spacing: 0.03em;
+    font-size: 0.9rem;
 }
 
 .retro-btn-light:hover {
@@ -196,9 +233,12 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--pure-white);
     border: 2px solid var(--pure-white);
     border-radius: 8px;
-    font-weight: 500;
+    font-weight: 400;
     padding: 0.75rem 1.5rem;
     transition: all 0.3s ease;
+    font-family: 'Comic Neue', cursive;
+    letter-spacing: 0.03em;
+    font-size: 0.9rem;
 }
 
 .retro-btn-outline-light:hover {
@@ -209,12 +249,12 @@ h1, h2, h3, h4, h5, h6 {
 
 .btn-sm {
     padding: 0.5rem 1rem;
-    font-size: 0.875rem;
+    font-size: 0.8rem;
 }
 
 .btn-lg {
     padding: 1rem 2rem;
-    font-size: 1.125rem;
+    font-size: 1rem;
 }
 
 /* Cards */
@@ -225,6 +265,7 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: var(--shadow-sm);
     transition: all 0.3s ease;
     overflow: hidden;
+    font-family: 'Comic Neue', cursive;
 }
 
 .retro-card:hover {
@@ -254,6 +295,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .retro-meta {
     color: var(--medium-grey);
+    font-family: 'Comic Neue', cursive;
+    font-weight: 300;
 }
 
 .retro-meta i {
@@ -296,6 +339,8 @@ h1, h2, h3, h4, h5, h6 {
 .retro-number {
     color: var(--pure-black);
     font-size: 2.5rem;
+    font-family: 'Chewy', cursive;
+    font-weight: 400;
 }
 
 /* Events Section */
@@ -311,30 +356,36 @@ h1, h2, h3, h4, h5, h6 {
     background: var(--pure-black);
     color: var(--pure-white);
     border-radius: 6px;
-    font-weight: 500;
+    font-weight: 400;
     padding: 0.5rem 0.75rem;
     font-size: 0.75rem;
     border: 1px solid var(--pure-black);
+    font-family: 'Comic Neue', cursive;
+    letter-spacing: 0.03em;
 }
 
 .retro-badge-dark {
     background: var(--dark-grey);
     color: var(--pure-white);
     border-radius: 6px;
-    font-weight: 500;
+    font-weight: 400;
     padding: 0.5rem 0.75rem;
     font-size: 0.75rem;
     border: 1px solid var(--dark-grey);
+    font-family: 'Comic Neue', cursive;
+    letter-spacing: 0.03em;
 }
 
 .retro-badge-light {
     background: var(--light-grey);
     color: var(--pure-black);
     border-radius: 6px;
-    font-weight: 500;
+    font-weight: 400;
     padding: 0.5rem 0.75rem;
     font-size: 0.75rem;
     border: 1px solid var(--pure-black);
+    font-family: 'Comic Neue', cursive;
+    letter-spacing: 0.03em;
 }
 
 /* Progress Bars */
@@ -356,6 +407,12 @@ h1, h2, h3, h4, h5, h6 {
 .event-meta {
     border-top: 1px solid var(--light-grey);
     padding-top: 1rem;
+    font-family: 'Comic Neue', cursive;
+    font-weight: 300;
+}
+
+.event-meta small {
+    font-size: 0.85rem;
 }
 
 /* Features Section */
@@ -402,6 +459,7 @@ h1, h2, h3, h4, h5, h6 {
     background: var(--dark-grey);
     color: var(--pure-white);
     border-top: 2px solid var(--pure-black);
+    font-family: 'Comic Neue', cursive;
 }
 
 .retro-hr {
@@ -438,6 +496,8 @@ h1, h2, h3, h4, h5, h6 {
     padding: 0.75rem 1rem;
     transition: all 0.3s ease;
     color: var(--dark-grey);
+    font-family: 'Comic Neue', cursive;
+    font-weight: 300;
 }
 
 .retro-input:focus {
@@ -452,6 +512,7 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 8px;
     padding: 1rem 1.5rem;
     background: var(--pure-white);
+    font-family: 'Comic Neue', cursive;
 }
 
 .alert-success {
@@ -481,12 +542,167 @@ h1, h2, h3, h4, h5, h6 {
     background: var(--pure-black);
     color: var(--pure-white);
     transition: all 0.3s ease;
+    font-family: 'Comic Neue', cursive;
 }
 
 .back-to-top:hover {
     background: var(--pure-white);
     color: var(--pure-black);
     transform: translateY(-2px);
+}
+
+/* Terminal Styles */
+.retro-terminal {
+    background: var(--pure-black);
+    border: 3px solid var(--pure-white);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow-xl);
+    font-family: 'Courier New', monospace;
+    max-width: 100%;
+}
+
+.terminal-header {
+    background: var(--dark-grey);
+    padding: 0.75rem 1rem;
+    border-bottom: 2px solid var(--pure-white);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'Comic Neue', cursive;
+}
+
+.terminal-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.terminal-btn {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid var(--pure-white);
+}
+
+.terminal-btn.close {
+    background: #ff5f56;
+}
+
+.terminal-btn.minimize {
+    background: #ffbd2e;
+}
+
+.terminal-btn.maximize {
+    background: #27ca3f;
+}
+
+.terminal-title {
+    color: var(--pure-white);
+    font-size: 0.875rem;
+    font-weight: 500;
+    flex: 1;
+    text-align: center;
+    font-family: 'Comic Neue', cursive;
+}
+
+.terminal-body {
+    padding: 1.5rem;
+    background: var(--pure-black);
+    color: var(--pure-white);
+    min-height: 350px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    font-family: 'Courier New', monospace;
+}
+
+.terminal-line {
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: flex-start;
+}
+
+.prompt {
+    color: #27ca3f;
+    font-weight: bold;
+    margin-right: 0.5rem;
+    min-width: 20px;
+}
+
+.command {
+    color: var(--pure-white);
+    font-family: 'Courier New', monospace;
+}
+
+.terminal-output {
+    margin-bottom: 0.5rem;
+    margin-left: 1.5rem;
+}
+
+.output-text {
+    color: var(--light-grey);
+    display: block;
+}
+
+.output-text.success {
+    color: #27ca3f;
+    font-weight: bold;
+}
+
+.output-text.highlight {
+    color: #ffbd2e;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.terminal-line.active {
+    align-items: center;
+}
+
+.blink {
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+.typed-text {
+    color: var(--pure-white);
+    border-right: 2px solid var(--pure-white);
+    animation: typing-cursor 1s infinite;
+}
+
+@keyframes typing-cursor {
+    0%, 50% { border-right-color: var(--pure-white); }
+    51%, 100% { border-right-color: transparent; }
+}
+
+/* Funky Cute Typography Enhancements */
+.display-1, .display-2, .display-3, .display-4, .display-5, .display-6 {
+    font-family: 'Chewy', 'Fredoka One', cursive;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+}
+
+.lead {
+    font-family: 'Comic Neue', cursive;
+    font-weight: 300;
+    letter-spacing: 0.01em;
+    line-height: 1.6;
+}
+
+.card-title {
+    font-family: 'Chewy', cursive;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+}
+
+.card-text {
+    font-family: 'Comic Neue', cursive;
+    font-weight: 300;
+    line-height: 1.6;
 }
 
 /* Responsive Design */
@@ -526,6 +742,23 @@ h1, h2, h3, h4, h5, h6 {
     
     .retro-number {
         font-size: 2rem;
+    }
+
+    /* Mobile font adjustments */
+    body {
+        font-size: 0.95rem;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    h2 {
+        font-size: 1.75rem;
+    }
+    
+    .lead {
+        font-size: 1.1rem;
     }
 }
 
@@ -593,129 +826,6 @@ h1, h2, h3, h4, h5, h6 {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--pure-black);
 }
-/* Terminal Styles */
-.retro-terminal {
-    background: var(--pure-black);
-    border: 3px solid var(--pure-white);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: var(--shadow-xl);
-    font-family: 'Courier New', monospace;
-    max-width: 100%;
-}
-
-.terminal-header {
-    background: var(--dark-grey);
-    padding: 0.75rem 1rem;
-    border-bottom: 2px solid var(--pure-white);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.terminal-buttons {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.terminal-btn {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 1px solid var(--pure-white);
-}
-
-.terminal-btn.close {
-    background: #ff5f56;
-}
-
-.terminal-btn.minimize {
-    background: #ffbd2e;
-}
-
-.terminal-btn.maximize {
-    background: #27ca3f;
-}
-
-.terminal-title {
-    color: var(--pure-white);
-    font-size: 0.875rem;
-    font-weight: 500;
-    flex: 1;
-    text-align: center;
-}
-
-.terminal-body {
-    padding: 1.5rem;
-    background: var(--pure-black);
-    color: var(--pure-white);
-    min-height: 350px;
-    font-size: 0.9rem;
-    line-height: 1.6;
-}
-
-.terminal-line {
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: flex-start;
-}
-
-.prompt {
-    color: #27ca3f;
-    font-weight: bold;
-    margin-right: 0.5rem;
-    min-width: 20px;
-}
-
-.command {
-    color: var(--pure-white);
-    font-family: 'Courier New', monospace;
-}
-
-.terminal-output {
-    margin-bottom: 0.5rem;
-    margin-left: 1.5rem;
-}
-
-.output-text {
-    color: var(--light-grey);
-    display: block;
-}
-
-.output-text.success {
-    color: #27ca3f;
-    font-weight: bold;
-}
-
-.output-text.highlight {
-    color: #ffbd2e;
-    font-weight: bold;
-    font-size: 1rem;
-}
-
-.terminal-line.active {
-    align-items: center;
-}
-
-.blink {
-    animation: blink 1s infinite;
-}
-
-@keyframes blink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
-}
-
-.typed-text {
-    color: var(--pure-white);
-    border-right: 2px solid var(--pure-white);
-    animation: typing-cursor 1s infinite;
-}
-
-@keyframes typing-cursor {
-    0%, 50% { border-right-color: var(--pure-white); }
-    51%, 100% { border-right-color: transparent; }
-}
 
 /* Mobile Responsiveness for Terminal */
 @media (max-width: 768px) {
@@ -768,5 +878,203 @@ h1, h2, h3, h4, h5, h6 {
 @media (min-width: 769px) and (max-width: 1024px) {
     .terminal-body {
         min-height: 320px;
+    }
+}
+
+/* Funky Cute Font Classes */
+.font-funky {
+    font-family: 'Chewy', cursive;
+}
+
+.font-cute {
+    font-family: 'Comic Neue', cursive;
+}
+
+.font-bubbly {
+    font-family: 'Fredoka One', cursive;
+}
+
+.font-readable {
+    font-family: 'Nunito', sans-serif;
+}
+
+/* Toast Notifications */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 9999;
+    max-width: 400px;
+}
+
+.toast {
+    background: var(--pure-white);
+    border: 2px solid;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-lg);
+    transform: translateX(-100%);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: 'Comic Neue', cursive;
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+}
+
+.toast.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.toast.success {
+    border-color: #10b981;
+    color: #065f46;
+    background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+}
+
+.toast.error {
+    border-color: #ef4444;
+    color: #7f1d1d;
+    background: linear-gradient(135deg, #fef2f2, #fef2f2);
+}
+
+.toast.warning {
+    border-color: #f59e0b;
+    color: #78350f;
+    background: linear-gradient(135deg, #fffbeb, #fffbeb);
+}
+
+.toast.info {
+    border-color: #3b82f6;
+    color: #1e3a8a;
+    background: linear-gradient(135deg, #eff6ff, #eff6ff);
+}
+
+.toast-icon {
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.toast.success .toast-icon {
+    color: #10b981;
+}
+
+.toast.error .toast-icon {
+    color: #ef4444;
+}
+
+.toast.warning .toast-icon {
+    color: #f59e0b;
+}
+
+.toast.info .toast-icon {
+    color: #3b82f6;
+}
+
+.toast-content {
+    flex: 1;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    color: inherit;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+}
+
+.toast-close:hover {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: currentColor;
+    opacity: 0.3;
+    width: 100%;
+    transform: scaleX(1);
+    transform-origin: left;
+    animation: progress 5s linear forwards;
+}
+
+@keyframes progress {
+    to {
+        transform: scaleX(0);
+    }
+}
+
+.toast:hover {
+    transform: translateX(0) scale(1.02);
+    box-shadow: var(--shadow-xl);
+}
+
+.toast:hover .toast-progress {
+    animation-play-state: paused;
+}
+
+.toast.slide-in {
+    animation: slideInLeft 0.5s ease-out;
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.toast.fade-out {
+    animation: fadeOutLeft 0.3s ease-in forwards;
+}
+
+@keyframes fadeOutLeft {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .toast-container {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        max-width: none;
+    }
+    
+    .toast {
+        padding: 0.875rem 1.25rem;
+    }
+    
+    .toast-content {
+        font-size: 0.85rem;
     }
 }

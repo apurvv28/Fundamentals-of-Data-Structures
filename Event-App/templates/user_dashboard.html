@@ -109,7 +109,7 @@
                     {% if registrations %}
                     <div class="list-group list-group-flush">
                         {% for reg in registrations %}
-                        <div class="list-group-item px-0 border-0 mb-2">
+                        <div class="list-group-item p-3 border-0 mb-2">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <h6 class="fw-bold mb-0">{{ reg.event_name }}</h6>
                                 <span class="badge retro-badge-{{ 'success' if reg.is_checked_in else 'warning' }}">
@@ -358,9 +358,14 @@ document.addEventListener('DOMContentLoaded', function() {
     object-fit: cover;
 }
 
+.list-group{
+    border-radius: 8px;
+    border: 2px solid var(--dark-grey);
+    background: var(--light-grey);
+}
+
 .list-group-item {
-    border: none !important;
-    padding: 0.75rem 0;
+    background: var(--light-grey);
 }
 
 .badge.retro-badge-success {
@@ -380,13 +385,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /* Ensure form inputs are visible and accessible */
 .form-control.retro-input {
-    background-color: white;
+    background-color: var(--pure-white);
     border: 2px solid var(--dark-grey);
     color: var(--pure-black);
 }
 
 .form-control.retro-input:focus {
-    background-color: white;
+    background-color: (--dark-grey);
     border-color: var(--pure-black);
     box-shadow: 0 0 0 0.2rem rgba(0, 0, 0, 0.1);
 }

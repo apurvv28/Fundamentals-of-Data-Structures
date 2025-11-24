@@ -558,9 +558,80 @@ def validate_qr():
 
 @app.route('/')
 def index():
-    featured_events = list(mongo.db.events.find().limit(3))
-    stats = get_event_stats()
-    return render_template('index.html', events=featured_events, stats=stats)
+    try:
+        # Get featured events (limit to 3 for homepage)
+        featured_events = list(mongo.db.events.find().sort('date', 1).limit(3))
+        
+        # Convert ObjectId to string for JSON serialization and ensure all fields exist
+        for event in featured_events:
+            event['_id'] = str(event['_id'])
+            # Ensure all required fields exist with default values
+            event.setdefault('registered_participants', [])
+            event.setdefault('capacity', 1)
+            event.setdefault('fee', 0)
+            event.setdefault('organization', 'Unknown')
+            event.setdefault('title', 'Untitled Event')
+            event.setdefault('description', 'No description available')
+            event.setdefault('date', 'TBA')
+            event.setdefault('time', 'TBA')
+            event.setdefault('venue', 'TBA')
+            event.setdefault('image_url', '/static/images/event-default.jpg')
+        
+        # Calculate statistics safely
+        total_events = mongo.db.events.count_documents({})
+        
+        # Get all events for participant calculation
+        all_events = list(mongo.db.events.find({}, {'registered_participants': 1}))
+        
+        # Calculate total participants
+        total_participants = 0
+        total_checked_in = 0
+        
+        for event in all_events:
+            participants = event.get('registered_participants', [])
+            if isinstance(participants, list):
+                total_participants += len(participants)
+                # For checked-in count - adjust based on your actual schema
+                # If you have a checked_in field, use that instead
+                total_checked_in += len(participants)  # Placeholder
+        
+        # Calculate attendance rate safely
+        if total_participants > 0:
+            attendance_rate = round((total_checked_in / total_participants) * 100, 1)
+        else:
+            attendance_rate = 0
+        
+        # Convert all stats to integers to avoid float issues
+        stats = {
+            'total_events': int(total_events),
+            'total_participants': int(total_participants),
+            'total_checked_in': int(total_checked_in),
+            'attendance_rate': int(attendance_rate)  # Convert to int for template
+        }
+        
+        return render_template('index.html', events=featured_events, stats=stats)
+    
+    except Exception as e:
+        print(f"Error in index route: {e}")
+        # Return default values in case of error
+        stats = {
+            'total_events': 0,
+            'total_participants': 0,
+            'total_checked_in': 0,
+            'attendance_rate': 0
+        }
+        return render_template('index.html', events=[], stats=stats)
+    
+    except Exception as e:
+        print(f"Error in index route: {e}")
+        # Return default values in case of error
+        stats = {
+            'total_events': 0,
+            'total_participants': 0,
+            'total_checked_in': 0,
+            'attendance_rate': 0
+        }
+        return render_template('index.html', events=[], stats=stats)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -951,21 +1022,6 @@ if __name__ == '__main__':
         mongo.db.events.create_index('host')
         mongo.db.registrations.create_index([('user_id', 1), ('event_id', 1)], unique=True)
         
-        # Create admin user if not exists
-        if not mongo.db.users.find_one({'username': 'admin'}):
-            hashed_password = bcrypt.hashpw('admin123'.encode('utf-8'), bcrypt.gensalt())
-            mongo.db.users.insert_one({
-                'username': 'admin',
-                'password': hashed_password,
-                'email': 'admin@eventhub.com',
-                'full_name': 'System Administrator',
-                'role': 'Admin',
-                'organization': 'EventHub',
-                'created_at': datetime.now(timezone.utc)
-            })
-            print("✅ Admin user created: username='admin', password='admin123'")
-        
-        preload_default_events()
     
     print("🚀 Starting EventHub with QR Code Scanning API...")
     app.run(debug=True, host='0.0.0.0', port=5001)
